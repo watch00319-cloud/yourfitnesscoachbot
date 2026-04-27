@@ -1,8 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: 'fitcoach-bot',
-      script: 'index.js',
+      name: 'elite-fitness-coach',
+      script: 'whatsapp.js',
       cwd: __dirname,
       instances: 1,
       exec_mode: 'fork',
@@ -14,11 +14,13 @@ module.exports = {
       exp_backoff_restart_delay: 200,
       env: {
         NODE_ENV: 'production',
-        PORT: process.env.PORT || 11000,
-        BOT_DISABLE_QR_OPEN: 'true',
-        PUPPETEER_EXECUTABLE_PATH: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-        SESSION_PATH: 'C:/Users/thenu/OneDrive/Desktop/whatsaap bot laptop on/.wwebjs_auth',
+        BOT_DISABLE_QR_OPEN: 'true'
       },
+      env_production: {
+        NODE_ENV: 'production',
+        SESSION_PATH: './auth_info_baileys'
+      }
     },
   ],
 };
+

@@ -1,35 +1,21 @@
-# Telegram Fitness Bot Build TODO ✅ PLAN APPROVED
+# Elite Premium Fitness Coach Bot - Transformation Plan
 
-## ✅ Planning Complete
-- [x] Analyzed WhatsApp files (index.js, aiService.js, config.js)
-- [x] Created comprehensive transformation plan
-- [x] User confirmed plan + provided TELEGRAM_BOT_TOKEN
+## Current Progress
+- [x] 1. Created detailed edit plan based on file analysis and task specs.
 
-## 🔄 Implementation Steps (Execute Sequentially)
+## Remaining Steps
+- [x] 2. Update package.json: Add @whiskeysockets/baileys, qrcode-terminal. Remove Telegram deps.
+- [x] 3. Update config.js: New pricing (₹1500/₹2999), Hinglish system prompt with modes/rules/anabolic disclaimer, WhatsApp settings.
+- [x] 4. Create whatsapp.js: Baileys setup, QR auth, message handlers (text/media/state/AI), text-based menus.
+- [x] 5. Update aiService.js: Gemini vision for photos, mode detection (free/sales/premium/report), Hinglish enforcement.
+- [x] 6. Update intentHandler.js: Hinglish patterns (sales triggers like 'plan chahiye'), anabolic keywords, photo detect.
+- [x] 7. Extend userStore.js & conversationStore.js: Full 12-point schema (name/veg/budget/etc.), analysis_step, premium_status.
+- [x] 8. Create analysisFlow.js: Stateful 12-question flow.
+- [x] 9. Create premiumHandler.js: Report format, upselling scripts, retention cron.
+- [x] 10. Update deployments: Procfile, ecosystem.config.js for whatsapp.js.
+- [x] 11. Install deps & test: npm install, npm start (QR scan), end-to-end flows.
+- [ ] 12. Final testing: Analysis, photos, sales, report.
+- [ ] 13. Attempt completion.
 
-### Phase 1: Core Setup ✅ COMPLETE
-1. [x] **userStore.js** - Created JSON persistence
-2. [x] **config.js** - Token + details set
-3. [x] **aiService.js** - Telegram adapted (MarkdownV2, userStore)
-4. [x] **package.json** - Scripts ready
+**Next**: npm install after step 2.
 
-
-
-### Phase 2: Main Bot Logic ✅ COMPLETE
-5. [x] **index.js** - FULL rewrite with all flows/buttons/AI/premium
-
-
-
-### Phase 3: Engagement & Bonus
-6. [ ] Add automations: daily tips, motivation, progress checks (setInterval)
-7. [ ] Gamification: streaks, rewards in userStore
-8. [ ] Referral system (/referral button)
-
-### Phase 4: Test & Deploy
-9. [ ] `npm install`
-10. [ ] Test flows: /start → menu → plans → premium
-11. [ ] Validate AI responses, buttons, persistence
-12. [ ] Update ecosystem.config.js for PM2
-13. [ ] `npm start` demo
-
-**Next: Step 1-4 (core files)**

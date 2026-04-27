@@ -1,28 +1,30 @@
 {
-  "name": "fitcoach-telegram-ai-bot",
+  "name": "elite-fitness-coach-whatsapp-bot",
   "version": "2.0.0",
-  "description": "Telegram AI Fitness Coach bot with conversion-focused premium funnel",
-  "main": "index.js",
+  "description": "Elite Premium Fitness Coach Bot for WhatsApp - Hinglish AI Coach with Premium Services",
+  "main": "whatsapp.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node --watch index.js",
-    "start:prod": "node index.js",
+    "start": "node whatsapp.js",
+    "dev": "node --watch whatsapp.js",
+    "start:prod": "node whatsapp.js",
     "pm2:start": "pm2 start ecosystem.config.js",
-    "pm2:restart": "pm2 restart fitcoach-telegram-bot"
+    "pm2:restart": "pm2 restart elite-fitness-coach"
   },
   "keywords": [
-    "telegram",
+    "whatsapp",
     "bot",
-    "ai",
+    "baileys",
     "fitness",
     "coach",
-    "conversion"
+    "hinglish",
+    "premium"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@whiskeysockets/baileys": "^6.7.7",
     "dotenv": "^17.4.2",
-    "node-telegram-bot-api": "^0.66.0"
+    "qrcode-terminal": "^0.12.0"
   }
 }
