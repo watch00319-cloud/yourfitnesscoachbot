@@ -1,0 +1,20 @@
+# Complete File List for Copy
+
+**Essential Files:**
+```
+config.js (YOUR_FITNESS_COACH name set)
+index.js (main bot + QR server)
+ecosystem.config.js (PM2 port 11000)
+package.json (dependencies)
+deploy-aws.sh (one-click deploy)
+qr-code.html (QR template)
+aiService.js, intentHandler.js, conversationStore.js
+```
+
+**Copy Command:**
+```bash
+cp *.js *.json *.html *.config.js deploy-aws.sh run.bat fitcoach-whatsapp-bot/
+cp -r .wwebjs_auth* fitcoach-whatsapp-bot/  # Sessions (optional)
+```
+
+**Deploy:** `cd fitcoach-whatsapp-bot && ./deploy-aws.sh`
