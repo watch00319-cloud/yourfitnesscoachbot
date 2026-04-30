@@ -1,4 +1,4 @@
-FROM node:18-bullseye-slim
+FROM node:20-bullseye-slim
 
 # Install Chromium browser and fonts to support all messaging languages
 RUN apt-get update && apt-get install -y \
@@ -26,4 +26,4 @@ RUN npm install
 COPY . .
 
 # Run bot
-CMD ["node", "index.js"]
+CMD ["node", "whatsapp-stable.js"]
