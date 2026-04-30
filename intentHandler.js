@@ -44,8 +44,8 @@ class IntentHandler {
 
     // Pricing
     this.subscriptionPatterns = [
-      /price|cost|rate|kitna|rupee|₹|fees|charges|payment/i,
-      /premium|paid|package|offer|discount/i,
+      /price|cost|rate|kitna|rupee|₹|fees|charges|payment|paid|screenshot/i,
+      /premium|paid|package|offer|discount|complete|koiya/i,
     ];
 
     // Anabolic keywords
@@ -73,7 +73,7 @@ class IntentHandler {
     if (this.salesPatterns.some(p => p.test(trimmedMsg))) {
       return {
         intent: 'sales_trigger',
-        context: 'HOT LEAD! User shows buying intent. Switch to premium sales mode immediately. Use ethical upselling with exact pricing from config.'
+        context: 'User shows interest. Give value first and introduce paid options only after enough meaningful exchanges.'
       };
     }
 
@@ -94,28 +94,28 @@ class IntentHandler {
     if (this.subscriptionPatterns.some(p => p.test(trimmedMsg))) {
       return {
         intent: 'subscription',
-        context: 'Pricing question. Show premium services clearly. Highlight value. Guide to UPI payment.'
+        context: 'Pricing or payment topic. If the conversation is still early, ask for fitness details first; otherwise explain paid options softly.'
       };
     }
 
     if (this.fitnessGoalPatterns.some(p => p.test(trimmedMsg))) {
       return {
         intent: 'fitness_goal',
-        context: 'Fitness goal detected. SERIOUS user. Start 12-point analysis flow if not complete. Offer personalized premium plan.'
+        context: 'Fitness goal detected. Acknowledge warmly, give free tips, and ask simple profile questions.'
       };
     }
 
     if (this.dietPatterns.some(p => p.test(trimmedMsg))) {
       return {
         intent: 'diet_inquiry',
-        context: 'Diet question. Give short FREE tip + ask veg/budget if unknown. Upsell custom diet chart.'
+        context: 'Diet question. Give a useful free tip and ask food preference or routine details.'
       };
     }
 
     if (this.workoutPatterns.some(p => p.test(trimmedMsg))) {
       return {
         intent: 'workout_inquiry',
-        context: 'Workout question. Basic 3-exercise routine + ask gym/home. Upsell full coaching.'
+        context: 'Workout question. Give simple training guidance and ask whether they train at home or gym.'
       };
     }
 
@@ -147,4 +147,3 @@ class IntentHandler {
 }
 
 module.exports = new IntentHandler();
-

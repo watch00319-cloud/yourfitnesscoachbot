@@ -1,161 +1,211 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const config = require('./config');
 const userStore = require('./userStore');
+const { parseFitnessDetails } = require('./profileParser');
 
-/**
- * Elite AI Service - WhatsApp Fitness Coach with Gemini Vision & Modes
- */
 class AIService {
   constructor() {
-    this.genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
-    this.textModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    this.visionModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    console.log('✅ Elite AI Service ready (Text + Vision)');
-  }
-
-  async generateReply(from, userMessage, userData = {}, intent = {}) {
-    try {
-      const history = []; // TODO: integrate conversationStore
-      const modeContext = this.getModeContext(userData, intent, userMessage);
-
-      const chat = this.textModel.startChat({
-        history,
-        systemInstruction: { 
-          parts: [{ 
-            text: config.SYSTEM_PROMPT + '\n\n' + modeContext 
-          }] 
-        }
-      });
-
-      const enhanced = this.enhanceWithUserData(userMessage, userData);
-      const result = await chat.sendMessage(enhanced);
-      const response = await result.response;
-      let reply = response.text();
-
-      // Enforce concise for free mode
-      if (!userData.premium_status) {
-        reply = reply.slice(0, 300) + '\n\nPremium ke liye full plan chahiye? 🔥';
+    this.genAI = null;
+    this.textModel = null;
+    
+    if (config.GEMINI_API_KEY) {
+      try {
+        this.genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+        this.textModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        console.log('✅ Gemini Premium AI Ready');
+      } catch (error) {
+        console.log('⚠️ Gemini setup failed - Professional fallback active');
       }
-
-      // Format report for premium
-      if (intent.intent === 'premium_report' || userData.analysis_complete) {
-        reply = this.formatFitnessReport(reply, userData);
-      }
-
-      userStore.setUser(from, { lastAIResponse: reply });
-      return this.cleanForWhatsApp(reply);
-    } catch (error) {
-      console.error('AI error:', error.message);
-      return this.buildFallbackReply(userMessage, userData, intent);
-    }
-  }
-
-  getModeContext(userData, intent, message) {
-    const lowerMsg = message.toLowerCase();
-    let context = '';
-
-    // Sales mode detect
-    if (intent.intent === 'subscription' || /serious|plan\s*chahiye|transform|body\s*bana|personal\s*coach/i.test(lowerMsg)) {
-      context += '\nSALES MODE: Upsell ethically. Use exact pricing/services from config. Build trust first.';
-    }
-
-    // Anabolic mode
-    if (/steroid|anabolic|test|cycle|trt|pct|gear/i.test(lowerMsg)) {
-      context += '\nANABOLIC MODE: Education only. Stress risks, bloodwork, PCT, doctor supervision. Recommend natural first. Harm reduction.';
-    }
-
-    // Free mode
-    if (!userData.premium_status) {
-      context += '\nFREE MODE: Short tips ONLY. No full plans. Always end with premium CTA.';
     } else {
-      context += '\nPREMIUM MODE: Full detailed guidance. Use CLIENT FITNESS REPORT format.';
-    }
-
-    // Retention
-    if (userData.premium_status && !userData.last_checkin) {
-      context += '\nRETENTION: Ask weight/energy/sleep/diet adherence/photos.';
-    }
-
-    return context;
-  }
-
-  async analyzePhoto(imageBase64, userData) {
-    try {
-      const prompt = `Analyze this fitness progress photo. Expert coach view:
-- Posture analysis
-- Fat storage patterns 
-- Muscle imbalances/weakness
-- Conditioning/definition level
-- Visible improvements
-- 7-day correction plan
-
-User context: ${JSON.stringify(userData)}
-Output in Hinglish.`;
-
-      const result = await this.visionModel.generateContent([
-        prompt,
-        { inlineData: { data: imageBase64, mimeType: 'image/jpeg' } }
-      ]);
-      return this.cleanForWhatsApp(result.response.text());
-    } catch (error) {
-      return 'Photo analysis: Good progress bhai! Weight/measurements update kar. 💪 Premium mein detailed breakdown milega.';
+      console.log('✅ Professional Fallback Mode - Premium Tone');
     }
   }
 
-  enhanceWithUserData(message, data) {
-    const context = [];
-    if (data.goal) context.push(`Goal: ${data.goal}`);
-    if (data.weight) context.push(`Weight: ${data.weight}kg`);
-    if (data.height) context.push(`Height: ${data.height}cm`);
-    if (data.age) context.push(`Age: ${data.age}`);
-    if (data.veg_nonveg) context.push(`Diet: ${data.veg_nonveg}`);
-    if (data.premium_status) context.push('Premium client');
-    return context.length ? `${message}\n\nUser profile: ${context.join(', ')}` : message;
+  async generateReply(from, userMessage, userData = {}) {
+    const normalized = userMessage.toLowerCase().trim();
+    const parsedDetails = parseFitnessDetails(userMessage);
+    const effectiveUserData = { ...userData, ...parsedDetails };
+
+    if (this.isFirstContact(effectiveUserData)) {
+      return this.firstMessage();
+    }
+
+    if (this.hasProfileUpdate(parsedDetails)) {
+      return this.profileProgressReply(effectiveUserData, parsedDetails);
+    }
+
+    if (this.isGoalReply(normalized)) {
+      return this.goalReply(normalized, effectiveUserData);
+    }
+
+    if (this.isPaidServiceQuestion(normalized) && !effectiveUserData._canOfferPaid) {
+      return this.earlyPaidServiceReply();
+    }
+
+    // Try Gemini first
+    if (this.genAI) {
+      try {
+        const chat = this.textModel.startChat({
+          systemInstruction: { parts: [{ text: config.SYSTEM_PROMPT }] }
+        });
+        
+        const result = await chat.sendMessage(userMessage);
+        let reply = await result.response.text();
+        
+        // Premium polish
+        reply = reply.slice(0, 350);
+        return this.formatPremiumReply(reply);
+        
+      } catch (error) {
+        console.log('Gemini fallback:', error.message);
+      }
+    }
+
+    // **Premium Professional Fallbacks**
+    return this.getPremiumFallback(normalized, effectiveUserData);
   }
 
-  formatFitnessReport(content, userData) {
-    return `*CLIENT FITNESS REPORT* 🔥
-
-Name: ${userData.name || 'N/A'}
-Goal: ${userData.goal || 'N/A'}
-Current Weight: ${userData.weight || 'N/A'}kg
-Target Weight: ${userData.target_weight || 'N/A'}kg  
-Timeline: ${userData.timeline || 'N/A'} months
-Veg/Non-Veg: ${userData.veg_nonveg || 'N/A'}
-Gym/Home: ${userData.gym_home || 'N/A'}
-
-Main Problems: 
-Metabolism Estimate: 
-Calorie Range: 
-Protein Target: 
-
-Recommended Plan:
-${content}`;
+  isFirstContact(userData) {
+    return userData._isNewUser === true || !userData.lastActive;
   }
 
-  cleanForWhatsApp(text) {
-    // WhatsApp markdown: *bold*, _italic_, ~strikethrough~
+  isGoalReply(message) {
+    return /(weight loss|fat loss|loss|slim|pet|muscle gain|gain|bulk|diet|better diet|transform|transformation)/i.test(message);
+  }
+
+  isPaidServiceQuestion(message) {
+    return /(price|cost|rate|kitna|rupee|₹|fees|charges|payment|paid|premium|package|plan)/i.test(message);
+  }
+
+  hasProfileUpdate(details) {
+    return ['weight', 'height', 'age', 'gender', 'goal']
+      .some(field => details[field]);
+  }
+
+  firstMessage() {
+    return `Tell me your goal:\n• Weight loss?\n• Muscle gain?\n• Better diet?\n• Full transformation?\n\nProfessional guidance available.`;
+  }
+
+  quickFitnessCheck() {
+    return `Tell me your goal:\n• Weight loss?\n• Muscle gain?\n• Better diet?\n• Full transformation?\n\nProfessional guidance available.`;
+  }
+
+  earlyPaidServiceReply() {
+    return `I can guide you properly, but first I need to understand your body and goal.\n\nShare these details:\n• Current weight and height\n• Age\n• Main goal\n\nThen I can suggest the right next step.`;
+  }
+
+  goalReply(message, userData = {}) {
+    const nextQuestion = this.nextProfileQuestion(userData);
+
+    if (/(weight loss|fat loss|loss|slim|pet)/i.test(message)) {
+      return `Great choice! Weight loss is a popular goal that I can definitely help you with.\n\nHere are 2 useful free tips to get started:\n• Keep a small calorie deficit daily\n• Add protein with each meal to stay full\n\n${nextQuestion}`;
+    }
+
+    if (/(muscle gain|gain|bulk|muscle)/i.test(message)) {
+      return `Great choice! Muscle gain is an excellent goal for your physique.\n\nHere are 2 useful free tips to get started:\n• Eat enough protein (1.6-2g per kg bodyweight)\n• Train with progressive overload each week\n\n${nextQuestion}`;
+    }
+
+    if (/(diet|better diet|meal|khana)/i.test(message)) {
+      return `Great choice! Improving your diet is the foundation of good health.\n\nHere are 2 useful free tips to get started:\n• Include protein in every meal for balance\n• Keep home-style foods simple and nutritious\n\n${nextQuestion}`;
+    }
+
+    return `Great choice! A full transformation will change how you look and feel.\n\nHere are 2 useful free tips to get started:\n• Keep your meals organized and consistent\n• Train regularly with both cardio and strength\n\n${nextQuestion}`;
+  }
+
+  profileProgressReply(userData, updatedDetails = {}) {
+    const acknowledgements = [];
+
+    if (userData.weight && userData.height && (updatedDetails.weight || updatedDetails.height)) {
+      acknowledgements.push(`Thank you for sharing. Your current weight is ${userData.weight} kg and height is ${userData.height}.`);
+    } else {
+      if (updatedDetails.weight && userData.weight) acknowledgements.push(`Noted, your current weight is ${userData.weight} kg.`);
+      if (updatedDetails.height && userData.height) acknowledgements.push(`Noted, your height is ${userData.height}.`);
+    }
+
+    if (updatedDetails.age && userData.age) acknowledgements.push(`Noted, your age is ${userData.age}.`);
+    if (updatedDetails.gender && userData.gender) acknowledgements.push(`Noted, gender is ${userData.gender}.`);
+    if (updatedDetails.goal && userData.goal) acknowledgements.push(`Great, your goal is ${userData.goal}.`);
+
+    const valueTip = this.smallValueTip(userData);
+    const nextQuestion = this.nextProfileQuestion(userData);
+
+    return `${acknowledgements.join('\n')}\n\n${valueTip}\n\n${nextQuestion}`.trim();
+  }
+
+  smallValueTip(userData) {
+    const goal = String(userData.goal || '').toLowerCase();
+    if (goal.includes('loss')) {
+      return 'Small tip: For fat loss, protein and daily steps make the calorie deficit easier to maintain.';
+    }
+    if (goal.includes('gain')) {
+      return 'Small tip: For muscle gain, progressive training and enough protein matter more than random supplements.';
+    }
+    return 'Small tip: Tracking simple basics like meals, steps, and sleep helps me guide you more accurately.';
+  }
+
+  nextProfileQuestion(userData) {
+    if (!userData.weight || !userData.height) {
+      return 'What is your current weight and height?';
+    }
+
+    if (!userData.age || !userData.gender) {
+      return 'Next, may I know your age and gender? This will help me give better suggestions.';
+    }
+
+    if (!userData.goal) {
+      return 'What is your main goal right now: weight loss, muscle gain, better diet, or full transformation?';
+    }
+
+    if (!userData.timeline) {
+      return 'What timeline do you have in mind for this goal?';
+    }
+
+    if (!userData.veg_nonveg) {
+      return 'Are you vegetarian or non-vegetarian?';
+    }
+
+    return 'How many days per week can you work out?';
+  }
+
+  formatPremiumReply(text) {
     return text
       .replace(/\*\*(.*?)\*\*/g, '*$1*')
-      .replace(/```/g, '')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+      .replace(/```[\s\S]*?```/g, '')
+      .trim()
+      .slice(0, 400);
   }
 
-  buildFallbackReply(message, data, intent) {
-    const normalized = message.toLowerCase();
-    if (/(diet|khana|meal)/.test(normalized)) {
-      return 'Diet tip: Roz 1.6-2.2g protein/kg bodyweight. Premium mein full chart! 🔥';
+  getPremiumFallback(message, userData) {
+    if (this.isGoalReply(message)) {
+      return this.goalReply(message, userData);
     }
-    if (/(workout|kasrat)/.test(normalized)) {
-      return 'Workout: 3x week full body. Push/pull/legs. Form perfect rakh! 💪';
+
+    if (message.includes('diet') || message.includes('meal') || message.includes('khana')) {
+      return `Tell me your current diet habits:\n• Vegetarian or non-vegetarian?\n• Any foods you avoid?\n• What do you eat on a normal day?\n\nProfessional guidance available.`;
     }
-    if (intent.intent === 'subscription') {
-      return `${config.SERVICES.FULL_COACHING.desc} - ${config.SERVICES.FULL_COACHING.price}\nUPI bhej!`;
+
+    if (message.includes('weight') || message.includes('height')) {
+      return `Tell me your current weight and height.\n\nProfessional guidance available.`;
     }
-    return `${MAIN_MENU}\n\nFree tips yahan, premium results wahan!`;
+
+    if (message.includes('age') || message.includes('gender')) {
+      return `Tell me your age and gender.\n\nProfessional guidance available.`;
+    }
+
+    if (message.includes('medical') || message.includes('injury') || message.includes('pain')) {
+      return `Do you have any medical conditions or injuries?\n\nProfessional guidance available.`;
+    }
+
+    if (message.includes('days') || message.includes('week') || message.includes('workout')) {
+      return `How many days per week can you work out?\n\nProfessional guidance available.`;
+    }
+
+    if (message.includes('price') || message.includes('premium') || message.includes('plan')) {
+      return this.earlyPaidServiceReply();
+    }
+
+    return this.quickFitnessCheck();
   }
 }
 
 module.exports = new AIService();
-
