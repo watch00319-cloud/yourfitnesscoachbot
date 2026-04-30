@@ -1,5 +1,77 @@
 {
   "6876286601": {
     "lastActive": 1777120226866
+  },
+  "120363177652787588@newsletter": {
+    "phone": "120363177652787588@newsletter",
+    "lastActive": 1777453404736,
+    "analysis_complete": false
+  },
+  "119907232518296@lid": {
+    "phone": "119907232518296@lid",
+    "lastActive": 1777515470769,
+    "analysis_complete": false,
+    "lastAIResponse": "🔥 *PREMIUM GUIDE PLAN*\n\nChoose service:\n\n*1. Monthly Diet Chart - ₹499*\nCustom monthly diet according to your goal\n\n*2. Beginner Exercise Chart - ₹499*\n30-day beginner workout plan\n\n*3. Your Personal Trainer:*\n┌─────────────────┐\n│ 1 Month  - ₹1999 │\n│ 3 Month  - ₹3999 │\n│ 6 Month  - ₹6999 │\n│ 12 Month - ₹9999 │\n└─────────────────┘\n\n*PERSONAL TRAINER FEATURES:*\n✓ Day 1 to last day full guidance\n✓ Weekly tracking\n✓ Weight progress monitoring\n✓ Habit correction push\n✓ Daily motivation tips\n✓ Custom plan by your lifestyle\n✓ Weekly workout changes\n✓ Aerobics/cardio guidance\n✓ Pro level mentorship\n\n---\n\nKis option mein interest hai?\n1 / 2 / 3 (Personal trainer)\n\nReply with number 🔥",
+    "goal": "Better diet",
+    "weight": "104",
+    "height": "178 cm",
+    "age": "39",
+    "gender": "Male",
+    "flowStep": "premium_plan",
+    "name": "manish",
+    "timeline": "3 months",
+    "workoutType": "Gym",
+    "selectedPlan": "basic",
+    "selectedService": "Beginner Exercise Chart",
+    "selectedPrice": "₹499"
+  },
+  "status@broadcast": {
+    "phone": "status@broadcast",
+    "lastActive": 1777522888514,
+    "analysis_complete": false,
+    "lastAIResponse": "Nice to meet you, ! 🙏\n\nNow tell me:\nWhat is your age?",
+    "gender": "female",
+    "flowStep": "age",
+    "goal": "Fat loss",
+    "name": ""
+  },
+  "172877382963436@lid": {
+    "phone": "172877382963436@lid",
+    "lastActive": 1777455653503,
+    "analysis_complete": false
+  },
+  "120363040001136790@g.us": {
+    "phone": "120363040001136790@g.us",
+    "lastActive": 1777523126149,
+    "analysis_complete": false,
+    "lastAIResponse": "Great choice! Weight gain ek excellent goal hai 💪\n\nAb tell me:\nWhat is your name?",
+    "flowStep": "name",
+    "goal": "Weight gain"
+  },
+  "258393990246619@lid": {
+    "phone": "258393990246619@lid",
+    "lastActive": 1777510674613,
+    "analysis_complete": false,
+    "lastAIResponse": "Tell me your goal:\n• Weight loss?\n• Muscle gain?\n• Better diet?\n• Full transformation?\n\nProfessional guidance available."
+  },
+  "120363329766627991@g.us": {
+    "phone": "120363329766627991@g.us",
+    "lastActive": 1777519240438,
+    "analysis_complete": false,
+    "lastAIResponse": "Welcome to Loving Hubby Fitness Family 💪\n\nAapka goal kya hai?\n• Fat loss\n• Weight gain  \n• Muscle gain\n• Strength\n• General fitness\n\nBas reply karein aur hum shuru karte hain!",
+    "flowStep": "goal"
+  },
+  "163711385886777@lid": {
+    "phone": "163711385886777@lid",
+    "lastActive": 1777510677533,
+    "analysis_complete": false,
+    "lastAIResponse": "Tell me your goal:\n• Weight loss?\n• Muscle gain?\n• Better diet?\n• Full transformation?\n\nProfessional guidance available."
+  },
+  "75673129509057@lid": {
+    "phone": "75673129509057@lid",
+    "lastActive": 1777513959270,
+    "analysis_complete": false,
+    "flowStep": "goal",
+    "lastAIResponse": "Welcome to Loving Hubby Fitness Family 💪\n\nAapka goal kya hai?\n• Fat loss\n• Weight gain  \n• Muscle gain\n• Strength\n• General fitness\n\nBas reply karein aur hum shuru karte hain!"
   }
 }

@@ -13,7 +13,7 @@ class UserStore {
         return JSON.parse(fs.readFileSync(this.dataFile, 'utf8'));
       }
     } catch (err) {
-      console.warn('UserStore load error:', err.message);
+      console.warn('UserStore load:', err.message);
     }
     return {};
   }
@@ -22,7 +22,7 @@ class UserStore {
     try {
       fs.writeFileSync(this.dataFile, JSON.stringify(this.users, null, 2));
     } catch (err) {
-      console.error('UserStore save error:', err.message);
+      console.error('UserStore save:', err.message);
     }
   }
 
@@ -30,28 +30,32 @@ class UserStore {
     return this.users[phone] || {};
   }
 
-  setUser(phone, data) {
-    this.users[phone] = { 
-      ...this.getUser(phone), 
-      ...data, 
-      lastActive: Date.now(),
-      analysis_complete: this.isAnalysisComplete(data)
-    };
+  setUser(phone, newData) {
+    // CRITICAL FIX: Merge old + new data FIRST
+    const oldData = this.getUser(phone);
+    const mergedData = { ...oldData, ...newData, lastActive: Date.now() };
+    
+    // Then calculate analysis_complete on FULL merged data
+    mergedData.analysis_complete = this.isAnalysisComplete(mergedData);
+    
+    this.users[phone] = mergedData;
     this.save();
+    return mergedData;
   }
 
-  // Check if full 12-point analysis done
   isAnalysisComplete(userData) {
     const required = ['name', 'age', 'height', 'weight', 'goal', 'target_weight', 'timeline', 'veg_nonveg', 'food_budget', 'gym_home', 'schedule', 'medical', 'experience'];
-    return required.every(field => userData[field]);
+    return required.every(field => userData[field] && userData[field].toString().trim());
   }
 
   updateStreak(phone) {
     const user = this.getUser(phone);
     const today = new Date().toDateString();
     if (user.lastActiveDate === today) return user.streak || 0;
+    
     const yesterday = new Date(Date.now() - 86400000).toDateString();
     const streak = user.lastActiveDate === yesterday ? (user.streak || 0) + 1 : 1;
+    
     this.setUser(phone, { streak, lastActiveDate: today });
     return streak;
   }
@@ -62,7 +66,6 @@ class UserStore {
     return code;
   }
 
-  // Premium management
   setPremiumStatus(phone, status, service, paymentProof = '') {
     this.setUser(phone, {
       premium_status: status,
@@ -82,6 +85,17 @@ class UserStore {
       diet_adherence: adherence,
       recent_photos: photos
     });
+  }
+
+  // Railway safe file ops
+  getStats() {
+    return {
+      totalUsers: Object.keys(this.users).length,
+      premiumUsers: Object.values(this.users).filter(u => u.premium_status).length,
+      activeToday: Object.values(this.users).filter(u => {
+        return Date.now() - (u.lastActive || 0) < 86400000;
+      }).length
+    };
   }
 }
 

@@ -40,6 +40,12 @@ class ConversationStore {
     return this.getConversation(phone).history;
   }
 
+  getUserMessageCount(phone) {
+    return this.getConversation(phone).history
+      .filter(message => message.role === 'user')
+      .length;
+  }
+
   updateAnalysisStep(phone, step) {
     const conv = this.getConversation(phone);
     conv.userData.analysis_step = step;
@@ -62,7 +68,9 @@ class ConversationStore {
   canPitchPremium(phone) {
     const conv = this.getConversation(phone);
     const hoursSince = (Date.now() - (conv.userData.last_pitch || 0)) / (1000 * 60 * 60);
-    return hoursSince > 1 && conv.userData.premium_pitch_count < 3;
+    return this.getUserMessageCount(phone) >= 4 &&
+           hoursSince > 1 &&
+           conv.userData.premium_pitch_count < 3;
   }
 
   markPitchSent(phone) {
@@ -83,4 +91,3 @@ class ConversationStore {
 }
 
 module.exports = new ConversationStore();
-

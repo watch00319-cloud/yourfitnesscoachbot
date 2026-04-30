@@ -9,41 +9,32 @@ class PremiumHandler {
   // Generate full CLIENT FITNESS REPORT
   static generateReport(phone) {
     const userData = userStore.getUser(phone);
+    const template = config.CLIENT_REPORT_TEMPLATE;
     
     if (!userData.analysis_complete) {
       return 'Pehle full analysis complete kar premium report ke liye! Start karne ke liye goal bata.';
     }
 
+    const bmr = this.calculateBMR(userData);
+    const calories = this.calculateCalories(userData);
+    const protein = this.calculateProtein(userData);
+    const workoutType = this.suggestTraining(userData);
+
     const report = `*CLIENT FITNESS REPORT* 🔥
 
-Name: ${userData.name || 'N/A'}
-Age: ${userData.age || 'N/A'} years
-Height: ${userData.height || 'N/A'} cm
-Current Weight: ${userData.weight || 'N/A'} kg
-Target Weight: ${userData.target_weight || 'N/A'} kg
-Timeline: ${userData.timeline || 'N/A'} months
+${template.fields[0]} ${userData.name || 'N/A'}
+${template.fields[1]} ${userData.goal || 'N/A'}
+${template.fields[2]} ${userData.weight || 'N/A'}kg
+${template.fields[3]} ${userData.target_weight || 'N/A'}kg
+${template.fields[4]} ${userData.timeline || 'N/A'} months
+${template.fields[5]} [AI Analysis: e.g. Slow metabolism, weak core]
+${template.fields[6]} ${calories}
+${template.fields[7]} ${protein}g
+${template.fields[8]} ${workoutType}
+${template.fields[9]} ${this.suggestPackage(userData)}
 
-Goal: ${userData.goal || 'N/A'}
-Veg/Non-Veg: ${userData.veg_nonveg || 'N/A'}
-Food Budget: ₹${userData.food_budget || 'N/A'}/month
-Gym/Home: ${userData.gym_home || 'N/A'}
-Schedule: ${userData.schedule || 'N/A'}
-Medical: ${userData.medical || 'None'}
-Experience: ${userData.experience || 'N/A'}
-
-*Metabolism Estimate:* BMR ~${this.calculateBMR(userData)} cal
-*Calorie Range:* ${this.calculateCalories(userData)}
-*Protein Target:* ${this.calculateProtein(userData)}g/day
-
-*Recommended Plan Overview:*
-1. Training: ${this.suggestTraining(userData)}
-2. Nutrition: ${this.suggestDiet(userData)}
-3. Supplements: Basic whey + multi (budget depending)
-4. Progress Tracking: Weekly weight + photos
-
-${userData.premium_status ? 'Continue crushing! Update progress.' : 'Ye overview hai. FULL detailed plan premium mein! 💪'}
-
-*Best Package for you:* ${this.suggestPackage(userData)}`;
+Next Step:
+${template.nextStep}`;
 
     return report;
   }
@@ -90,47 +81,52 @@ ${userData.premium_status ? 'Continue crushing! Update progress.' : 'Ye overview
 
   // Weekly retention message
   static getRetentionMessage(phone) {
-    const user = userStore.getUser(phone);
-    return `*Weekly Check-in bhai! 💪*
+    return `*Weekly Check-in*
 
-Current weight kitna? 
-Energy level? (1-10)
-Sleep hours?
-Diet kitna % follow kiya?
-Photos bhej (front/side)?
+- Current weight?
+- Energy level?
+- Diet follow hui?
+- Workout done?
+- Sleep kaisa hai?
+- Updated photo bhejo
 
-Update kar, plan adjust karte hain!`;
+Update bhej dijiye, plan adjust karte hain.`;
   }
 
   // Upsell script
   static getUpsellScript(intent) {
-    return `Bro tu serious lag raha hai 🔥
+    return `You seem serious about your goal.
 
-Random tips se nahi, *proper strategy* chahiye.
+Random advice often misses the details that matter, like your weight, routine, food preference, schedule, and medical history.
 
-*Mere Premium Options:*
-1. Custom Diet Chart = ${config.SERVICES.CUSTOM_DIET.price}
-2. Monthly Nutrition = ${config.SERVICES.NUTRITION_SUPPORT.price}
-3. Full Coaching = ${config.SERVICES.FULL_COACHING.price}
+With professional guidance, you get:
+• A plan matched to your body and goal
+• Diet and workout adjustments as you progress
+• Clear follow-up instead of guessing
 
-Sach mein result chahiye to personally guide karunga.
-UPI ready? Payment link: ${config.UPI_LINK}
+Paid options are available when you are ready:
+• Custom Diet Chart: ${config.SERVICES.CUSTOM_DIET.price}
+• Monthly Nutrition Support: ${config.SERVICES.NUTRITION_SUPPORT.price}
+• Full Personal Coaching: ${config.SERVICES.FULL_COACHING.price}
 
-Kaunsa package? Reply kar!`;
+I will still guide you here step by step.`;
   }
 
   // Payment confirmation
   static confirmPayment(phone, amount, service, proof) {
     userStore.setPremiumStatus(phone, true, service, proof);
-    return `Payment confirmed! ✅ 
+    return `Payment received.
 
-Tu ab mera *premium client* hai bhai.
-Aaj se full support - diet, workout, weekly checkins.
-
-*Next:* Photos bhej current status ke liye.
-Start karte hain transformation! 🔥`;
+Your transformation support starts now.`;
   }
+  static getFollowupMessage() {
+    return `Results come from consistent action.
+
+Share your latest weight, diet, and workout status so I can guide the next step.`;
+  }
+
 }
 
 module.exports = PremiumHandler;
+
 

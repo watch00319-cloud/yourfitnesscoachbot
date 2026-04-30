@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'elite-fitness-coach',
-      script: 'whatsapp.js',
+      script: 'whatsapp-stable.js',
       cwd: __dirname,
       instances: 1,
       exec_mode: 'fork',
@@ -18,9 +18,8 @@ module.exports = {
       },
       env_production: {
         NODE_ENV: 'production',
-        SESSION_PATH: './auth_info_baileys'
+        SESSION_PATH: './auth_info'
       }
     },
   ],
 };
-
