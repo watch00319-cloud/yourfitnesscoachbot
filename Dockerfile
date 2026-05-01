@@ -1,29 +1,34 @@
-FROM node:20-bullseye-slim
+# Use Python 3.11 slim image
+FROM python:3.11-slim
 
-# Install Chromium browser and fonts to support all messaging languages
-RUN apt-get update && apt-get install -y \
-    chromium \
-    fonts-ipafont-gothic \
-    fonts-wqy-zenhei \
-    fonts-thai-tlwg \
-    fonts-kacst \
-    fonts-freefont-ttf \
-    libxss1 \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
-
-# Force Puppeteer to use the installed Chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
+# Set working directory
 WORKDIR /app
 
-# Copy and install Node packages
-COPY package*.json ./
-RUN npm install
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy bot code
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install Playwright browsers
+RUN playwright install chromium
+
+# Copy application code
 COPY . .
 
-# Run bot
-CMD ["node", "whatsapp-stable.js"]
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV DISPLAY=:99
+ENV PYPPETEER_CHROMIUM_REVISION=1040215
+
+# Expose port (not needed for Railway but good practice)
+EXPOSE 8000
+
+# Command to run the application
+CMD ["python", "app.py"]
