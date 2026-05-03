@@ -1,34 +1,24 @@
-# Use Python 3.11 slim image
-FROM python:3.11-slim
+FROM node:20-bullseye-slim
 
-# Set working directory
-WORKDIR /app
-
-# Install system dependencies
+# Install Chromium browser and fonts to support all messaging languages
 RUN apt-get update && apt-get install -y \
     chromium \
-    chromium-driver \
+    fonts-ipafont-gothic \
+    fonts-wqy-zenhei \
+    fonts-thai-tlwg \
+    fonts-kacst \
+    fonts-freefont-ttf \
+    libxss1 \
+    --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+WORKDIR /app
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+COPY package*.json ./
 
-# Install Playwright browsers
-RUN playwright install chromium
+RUN npm install
 
-# Copy application code
 COPY . .
 
-# Set environment variables
-ENV PYTHONPATH=/app
-ENV DISPLAY=:99
-ENV PYPPETEER_CHROMIUM_REVISION=1040215
-
-# Expose port (not needed for Railway but good practice)
-EXPOSE 8000
-
-# Command to run the application
-CMD ["python", "app.py"]
+# Run bot
+CMD ["node", "whatsapp-stable.js"]
