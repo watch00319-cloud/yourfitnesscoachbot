@@ -359,6 +359,36 @@ let lastReconnectTime = null;
 const MAX_RECONNECT_ATTEMPTS = 10;
 const RECONNECT_BACKOFF_MS = 5000; // 5 seconds base backoff
 
+// 🪵 GLOBAL WINSTON LOGGER
+const appLogger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'bot.log' }),
+    new winston.transports.File({
+      filename: 'bot-error.log',
+      level: 'error'
+    }),
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    })
+  ]
+});
+
+// Log helper
+const log = {
+  info: (msg, meta = {}) => appLogger.info(msg, { ...meta, source: 'whatsapp-stable' }),
+  error: (msg, meta = {}) => appLogger.error(msg, { ...meta, source: 'whatsapp-stable' }),
+  warn: (msg, meta = {}) => appLogger.warn(msg, { ...meta, source: 'whatsapp-stable' })
+};
+
 function scheduleRestart(delayMs = 5000) {
   if (reconnectTimer || isStartingBot) return;
   
@@ -442,36 +472,6 @@ async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
     
 const { version } = await fetchLatestBaileysVersion();
-
-// 🪵 GLOBAL WINSTON LOGGER
-const appLogger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.File({ filename: 'bot.log' }),
-    new winston.transports.File({
-      filename: 'bot-error.log',
-      level: 'error'
-    }),
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
-});
-
-// Log helper
-const log = {
-  info: (msg, meta = {}) => appLogger.info(msg, { ...meta, source: 'whatsapp-stable' }),
-  error: (msg, meta = {}) => appLogger.error(msg, { ...meta, source: 'whatsapp-stable' }),
-  warn: (msg, meta = {}) => appLogger.warn(msg, { ...meta, source: 'whatsapp-stable' })
-};
 const baileysLogger = pino({ level: 'error' });
 
     log.info('bot_startup_initiated', {
