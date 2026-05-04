@@ -523,8 +523,8 @@ const baileysLogger = pino({ level: 'error' });
       browser: Browsers.ubuntu('Chrome'),
       syncFullHistory: false,
       markOnlineOnConnect: false,
-      defaultQueryTimeoutMs: 60000,
-      connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: 120000,
+      connectTimeoutMs: 120000,
       keepAliveIntervalMs: 30000,
       generateHighQualityLinkPreview: false
     });
