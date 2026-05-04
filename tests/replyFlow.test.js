@@ -25,7 +25,9 @@ async function testPlanQuestionDoesNotSellTooEarly() {
   });
 
   assert(!/₹|paid options|custom diet chart|monthly nutrition|full personal coaching/i.test(reply));
-  assert(/current weight and height/i.test(reply));
+  assert(/name/i.test(reply));
+  assert(/activity level/i.test(reply));
+  assert(/food preference/i.test(reply));
 }
 
 function testPremiumPitchWaitsForMeaningfulExchanges() {

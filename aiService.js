@@ -91,7 +91,7 @@ class AIService {
   }
 
   earlyPaidServiceReply() {
-    return `I can guide you properly, but first I need to understand your body and goal.\n\nShare these details:\n• Current weight and height\n• Age\n• Main goal\n\nThen I can suggest the right next step.`;
+    return `Premium details share karne se pehle main aapko ek free basic plan bana deta hoon.\n\nYe details bhej do:\n• Name\n• Age\n• Gender\n• Height\n• Weight\n• Goal\n• Activity level\n• Food preference\n• Any medical condition\n\nUske baad main FREE BASIC PLAN dunga, phir aap PREMIUM choose kar sakte ho.`;
   }
 
   goalReply(message, userData = {}) {
