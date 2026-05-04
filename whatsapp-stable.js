@@ -15,6 +15,7 @@ const intentHandler = require('./intentHandler');
 const premiumHandler = require('./premiumHandler');
 const aiService = require('./aiService');
 const fitnessFlow = require('./fitnessFlow');
+const jobService = require('./jobService');
 const { renderQrPage } = require('./qrPage');
 const { parseFitnessDetails } = require('./profileParser');
 
@@ -698,7 +699,17 @@ const baileysLogger = pino({ level: 'error' });
           }
 
           conversationStore.addMessage(userId, 'user', text);
-          
+
+          // Job service flow (handles 'job' or common typo 'jop')
+          if (/\b(job|jop)\b/i.test(text)) {
+            const jobResult = jobService.processFlow(userId, text);
+            response = jobResult.reply;
+            conversationStore.addMessage(userId, 'assistant', response);
+            await sock.sendMessage(userId, { text: response });
+            processingUsers.delete(userId);
+            continue;
+          }
+
           // Check for steroids question - handle specially
           if (fitnessFlow.isSteroidsQuestion(text)) {
             response = fitnessFlow.handleSteroidsQuestion();
