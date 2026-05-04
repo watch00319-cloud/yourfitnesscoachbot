@@ -706,6 +706,22 @@ const baileysLogger = pino({ level: 'error' });
             response = jobResult.reply;
             conversationStore.addMessage(userId, 'assistant', response);
             await sock.sendMessage(userId, { text: response });
+
+            // If job flow completed, forward submission to owner/admin
+            if (jobResult.done) {
+              try {
+                const u = userStore.getUser(userId) || {};
+                const owner = config.OWNER_PHONE || PHONE_NUMBER;
+                const summary = `New job submission from: ${userId}\nName: ${u.name || 'N/A'}\nRole: ${u.jobRole || 'N/A'}\nExperience: ${u.jobExperience || 'N/A'}\nLocation: ${u.jobLocation || 'N/A'}\nContact: ${u.jobContact || 'N/A'}`;
+                // send to owner
+                await sock.sendMessage(owner, { text: summary });
+                log.info('job_forwarded', { userId, owner });
+              } catch (err) {
+                console.error('Error forwarding job submission to owner:', err.message);
+                log.error('job_forward_error', { userId, error: err.message });
+              }
+            }
+
             processingUsers.delete(userId);
             continue;
           }

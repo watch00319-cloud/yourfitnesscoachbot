@@ -20,23 +20,26 @@ class JobService {
     switch (step) {
       case this.STEP.START:
         userStore.setUser(userId, { jobStep: this.STEP.ROLE });
-        return { reply: 'Kya role chahiye aapko? (example: Sales, Delivery, Data entry, Developer)', done: false };
+        return { reply: 'Chalo, batao kaunsa role chahiye — example: Sales, Delivery, Data Entry, Developer. Main aapke liye options dhoondhunga.', done: false };
 
       case this.STEP.ROLE:
         userStore.setUser(userId, { jobRole: msg, jobStep: this.STEP.EXPERIENCE });
-        return { reply: `Achha — role: ${msg}. Kitne saal ka experience hai aapka?`, done: false };
+        return { reply: `Achha — role set hogaya: *${msg}*.
+Kitne saal ka experience hai aapka is role mein? (example: 1 year, 3 years)`, done: false };
 
       case this.STEP.EXPERIENCE:
         userStore.setUser(userId, { jobExperience: msg, jobStep: this.STEP.LOCATION });
-        return { reply: `Got it. Aap kis shehar mein kaam karna chahte ho?`, done: false };
+        return { reply: `Perfect. Experience noted: *${msg}*.
+Ab batao — kis shehar ya area mein kaam chahiye aapko?`, done: false };
 
       case this.STEP.LOCATION:
         userStore.setUser(userId, { jobLocation: msg, jobStep: this.STEP.CONTACT });
-        return { reply: `Share your preferred contact (WhatsApp number or email) so we can follow up.`, done: false };
+        return { reply: `Got it — location: *${msg}*.
+Ab final step: apna contact share karo (WhatsApp number ya email) taaki hum follow up kar saken.`, done: false };
 
       case this.STEP.CONTACT:
         userStore.setUser(userId, { jobContact: msg, jobStep: this.STEP.DONE });
-        return { reply: `Thanks — hum aapko best matches bhej denge jaldi. Koi aur madad chahiye?`, done: true };
+        return { reply: `Shukriya! Hum aapke liye best matches dhoondhenge aur jaldi contact karenge. Agar aur kuch add karna ho, abhi bata sakte ho.`, done: true };
 
       default:
         userStore.setUser(userId, { jobStep: this.STEP.ROLE });
