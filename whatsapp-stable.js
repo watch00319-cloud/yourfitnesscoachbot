@@ -6,6 +6,7 @@ const express = require('express');
 const winston = require('winston');
 const pino = require('pino');
 const QRCode = require('qrcode');
+const s3Sync = require('./s3-sync');
 
 // 🧠 PROFESSIONAL MODULES
 const config = require('./config');
@@ -255,6 +256,11 @@ app.get('/stats', (req, res) => {
     timestamp: new Date().toISOString()
   });
   
+  // Job submissions metric
+  const jobSubmissionsCount = (() => {
+    try { const jobStore = require('./jobStore'); return jobStore.getRecent(200).length; } catch(e) { return 0; }
+  })();
+  
   res.json({
     timestamp: new Date().toISOString(),
     bot: {
@@ -272,6 +278,7 @@ app.get('/stats', (req, res) => {
       total: totalConversations,
       active: activeConversations,
       inactivePremium: inactivePremiumUsers.length,
+      jobSubmissions: jobSubmissionsCount,
       processingUsers: processingUsers.size,
       cooldownUsers: cooldownUsers.size,
       avgMessagesPerConversation: parseFloat(avgMessagesPerConversation),
@@ -295,13 +302,30 @@ app.get('/stats', (req, res) => {
       arch: process.arch
     },
     logs: 'bot.log | bot-error.log',
-    endpoints: {
+      endpoints: {
       status: '/api/status',
       qr: '/qr',
       qrPng: '/qr.png',
       stats: '/stats'
     }
   });
+});
+
+// Admin: view recent job submissions (basic HTML)
+app.get('/admin/jobs', (req, res) => {
+  try {
+    const jobStore = require('./jobStore');
+    const subs = jobStore.getRecent(100);
+    let html = `<html><head><title>Job Submissions</title><meta charset="utf-8"/></head><body><h1>Recent Job Submissions (${subs.length})</h1><ul>`;
+    for (const s of subs) {
+      html += `<li><strong>${s.role}</strong> — ${s.experience} — ${s.location} — ${s.contact} <br/><small>from: ${s.userId} • ${s.createdAt}</small></li>`;
+    }
+    html += `</ul></body></html>`;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (err) {
+    res.status(500).send('Error loading job submissions');
+  }
 });
 app.get('/qr', (req, res) => res.send(renderQrPage({
   hasQr: !!currentQR,
@@ -449,8 +473,15 @@ function resetAuthState() {
   } catch (error) {
     console.error('❌ Failed to reset auth directory:', error.message);
   }
-
   fs.mkdirSync(AUTH_DIR, { recursive: true });
+  // If S3 backup is configured, also remove stored auth there
+  if (process.env.S3_BUCKET) {
+    s3Sync.deleteAuth(AUTH_DIR).then(() => {
+      log.info('s3_auth_deleted_on_reset', { authDir: AUTH_DIR });
+    }).catch((e) => {
+      log.warn('s3_delete_failed', { error: e.message });
+    });
+  }
   currentQR = null;
   hasOpenedBrowserForQR = false;
   isPairingRequested = false;
@@ -499,6 +530,17 @@ const baileysLogger = pino({ level: 'error' });
     });
     
     sock.ev.on('creds.update', saveCreds);
+    // Also upload auth files to S3 (if configured) so auth persists across restarts
+    if (process.env.S3_BUCKET) {
+      sock.ev.on('creds.update', async () => {
+        try {
+          await s3Sync.uploadAuth(AUTH_DIR);
+          log.info('s3_auth_uploaded', { authDir: AUTH_DIR });
+        } catch (e) {
+          log.warn('s3_upload_failed', { error: e.message });
+        }
+      });
+    }
 
     sock.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect, qr, pairingCode } = update;
@@ -706,6 +748,22 @@ const baileysLogger = pino({ level: 'error' });
             response = jobResult.reply;
             conversationStore.addMessage(userId, 'assistant', response);
             await sock.sendMessage(userId, { text: response });
+
+            // If job flow completed, forward submission to owner/admin
+            if (jobResult.done) {
+              try {
+                const u = userStore.getUser(userId) || {};
+                const owner = config.OWNER_PHONE || PHONE_NUMBER;
+                const summary = `New job submission from: ${userId}\nName: ${u.name || 'N/A'}\nRole: ${u.jobRole || 'N/A'}\nExperience: ${u.jobExperience || 'N/A'}\nLocation: ${u.jobLocation || 'N/A'}\nContact: ${u.jobContact || 'N/A'}`;
+                // send to owner
+                await sock.sendMessage(owner, { text: summary });
+                log.info('job_forwarded', { userId, owner });
+              } catch (err) {
+                console.error('Error forwarding job submission to owner:', err.message);
+                log.error('job_forward_error', { userId, error: err.message });
+              }
+            }
+
             processingUsers.delete(userId);
             continue;
           }
@@ -791,6 +849,18 @@ const baileysLogger = pino({ level: 'error' });
   }
 }
 
-startBot();
+// Download auth from S3 (if configured) then start bot
+(async () => {
+  if (process.env.S3_BUCKET) {
+    try {
+      console.log('⬇️ Downloading auth_info from S3 (if available)');
+      await s3Sync.downloadAuth(AUTH_DIR);
+      log.info('s3_auth_downloaded', { authDir: AUTH_DIR });
+    } catch (e) {
+      log.warn('s3_download_failed', { error: e.message });
+    }
+  }
+  startBot();
+})();
 
 process.on('SIGINT', () => process.exit(0));
