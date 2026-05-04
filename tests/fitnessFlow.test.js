@@ -65,10 +65,13 @@ function testCollectionCapturesMissingFieldsThroughMedicalCondition() {
 
   result = fitnessFlow.processFlow(userData, 'muscle gain');
   assert.strictEqual(result.nextStep, fitnessFlow.STEP.ACTIVITY_LEVEL);
+  assert.strictEqual(result.userData.goal, 'Muscle Gain');
+  assert(/activity level/i.test(result.message));
   userData = { ...userData, ...result.userData };
 
   result = fitnessFlow.processFlow(userData, 'moderate');
   assert.strictEqual(result.nextStep, fitnessFlow.STEP.FOOD_PREFERENCE);
+  assert(/veg|non-veg/i.test(result.message));
   userData = { ...userData, ...result.userData };
 
   result = fitnessFlow.processFlow(userData, 'non veg');

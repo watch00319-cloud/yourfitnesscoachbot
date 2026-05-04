@@ -667,7 +667,7 @@ const baileysLogger = pino({ level: 'error' });
           '';
         if (!text.trim()) continue;
         cleanupCooldowns();
-        
+
         console.log('📨 Processing:', userId, text.substring(0, 50));
         log.info('message_processing_start', {
           userId,
@@ -676,7 +676,7 @@ const baileysLogger = pino({ level: 'error' });
           processingUsersCount: processingUsers.size
         });
         processingUsers.add(userId);
-        
+
         try {
           // 🔥 STEP 3: FULL PROFESSIONAL FLOW
           const { intent } = intentHandler.detectIntent(userId, text);
