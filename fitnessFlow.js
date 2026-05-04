@@ -1,590 +1,657 @@
 /**
- * Complete Fitness Business Flow Handler
- * Implements the full sales and onboarding flow for the WhatsApp bot
+ * Fitness conversation flow with hard-gated premium handling.
  */
-
 class FitnessFlow {
   constructor() {
-    // Flow states
     this.STEP = {
       WELCOME: 'welcome',
-      LANGUAGE: 'language',
+      GOAL: 'goal',
       NAME: 'name',
       AGE: 'age',
       GENDER: 'gender',
-      WEIGHT: 'weight',
       HEIGHT: 'height',
-      GOAL: 'goal',
-      TIMELINE: 'timeline',
-      WORKOUT_TYPE: 'workout_type',
-      PLAN_SELECTION: 'plan_selection',
-      BASIC_PLAN: 'basic_plan',
+      WEIGHT: 'weight',
+      ACTIVITY_LEVEL: 'activity_level',
+      FOOD_PREFERENCE: 'food_preference',
+      MEDICAL_CONDITION: 'medical_condition',
+      FREE_PLAN: 'free_plan',
       PREMIUM_PLAN: 'premium_plan',
       FOLLOW_UP: 'follow_up'
     };
+
+    this.promptVariants = {
+      premium_gate: [
+        `Premium details dunga, but sabse pehle main aapko ek FREE BASIC PLAN bana deta hoon.\n\nStart karte hain. Aapka naam kya hai?`,
+        `Pehle free basic assessment kar lete hain, phir premium options dikhaunga.\n\nSabse pehle apna name bhejo.`,
+        `Bhai tension mat lo, premium bhi milega. Lekin best result ke liye pehle free basic plan ready karte hain.\n\nNaam batao.`
+      ],
+      name: [
+        `Chalo start karte hain. Aapka naam kya hai?`,
+        `Sabse pehle apna name bhej do.`,
+        `Quick start ke liye naam bata do.`
+      ],
+      age: [
+        `Nice. Ab age batao.`,
+        `Theek hai, ab apni age share karo.`,
+        `Good start. Ab age likho.`
+      ],
+      gender: [
+        `Ab gender batao: Male ya Female?`,
+        `Next detail: gender kya hai?`,
+        `Body plan personalize karne ke liye gender chahiye: Male ya Female?`
+      ],
+      height: [
+        `Ab height bhejo. Format: 172 cm ya 5'8".`,
+        `Height share karo. 170 cm ya 5'10" format chalega.`,
+        `Ab apni height bata do.`
+      ],
+      weight: [
+        `Weight batao in kg.`,
+        `Ab current weight bhejo. Example: 72 kg.`,
+        `Current body weight kitna hai?`
+      ],
+      goal: [
+        `Aapka main goal kya hai: Weight Loss, Weight Gain, ya Muscle Gain?`,
+        `Target clear karte hain. Goal batao: Weight Loss / Weight Gain / Muscle Gain.`,
+        `Ab goal likho: Weight Loss, Weight Gain, ya Muscle Gain.`
+      ],
+      activity_level: [
+        `Activity level kya hai: Low, Moderate, ya High?`,
+        `Roz ka activity level share karo: Low / Moderate / High.`,
+        `Lifestyle ke hisaab se activity level batao.`
+      ],
+      food_preference: [
+        `Food preference kya hai: Veg ya Non-Veg?`,
+        `Diet customize karne ke liye batao: Veg ya Non-Veg?`,
+        `Ab food preference share karo.`
+      ],
+      medical_condition: [
+        `Koi medical condition, allergy, ya digestion issue hai? Nahi hai to "No medical condition" likh do.`,
+        `Last detail: koi medical issue ya allergy? Agar nahi hai to "No medical condition" bhej do.`,
+        `Bas ek last cheez. Medical condition ya injury hai kya?`
+      ],
+      invalid_age: [
+        `Valid age bhejo. 10 se 100 ke beech likho.`,
+        `Age thoda clear format mein bhejo. Example: 27.`,
+        `Age samajh nahi aayi. Sirf number mein bhejo.`
+      ],
+      invalid_gender: [
+        `Gender clearly likho: Male ya Female.`,
+        `Please Male ya Female mein reply karo.`,
+        `Ye detail clear chahiye. Male ya Female?`
+      ],
+      invalid_height: [
+        `Height proper format mein bhejo: 172 cm ya 5'10".`,
+        `Height samajh nahi aayi. Example: 168 cm.`,
+        `Please height clear format mein share karo.`
+      ],
+      invalid_weight: [
+        `Valid weight bhejo in kg. Example: 68 kg.`,
+        `Weight clear format mein bhejo. 20 se 300 kg ke beech hona chahiye.`,
+        `Current weight dobara bhejo. Example: 82 kg.`
+      ],
+      invalid_goal: [
+        `Goal in 3 options mein se choose karo: Weight Loss / Weight Gain / Muscle Gain.`,
+        `Target clear nahi hua. Please Weight Loss, Weight Gain, ya Muscle Gain likho.`,
+        `Goal dobara bhejo: Weight Loss / Weight Gain / Muscle Gain.`
+      ],
+      invalid_activity: [
+        `Activity level inme se choose karo: Low / Moderate / High.`,
+        `Low, Moderate, ya High mein reply karo.`,
+        `Activity level clear chahiye. Low / Moderate / High?`
+      ],
+      invalid_food: [
+        `Food preference likho: Veg ya Non-Veg.`,
+        `Veg ya Non-Veg mein reply karo.`,
+        `Diet ke liye ye detail chahiye: Veg / Non-Veg.`
+      ],
+      follow_up: [
+        `Agar aur detail chahiye ya exercise kaise karu poochna hai, seedha message kar do.`,
+        `Next step ke liye ya to PREMIUM type karo ya workout help maango.`,
+        `Plan mil gaya. Ab chaho to PREMIUM likho ya workout guidance le lo.`
+      ]
+    };
   }
 
-  // Get welcome message
   getWelcomeMessage() {
-    return `Welcome to Loving Hubby Fitness Family 💪
-
-Aapka goal kya hai?
-• Fat loss
-• Weight gain  
-• Muscle gain
-• Strength
-• General fitness
-
-Bas reply karein aur hum shuru karte hain!`;
+    return `Welcome to Our Fitness Family\n\nAapka goal kya hai?\n• Weight Loss\n• Weight Gain\n• Muscle Gain\n\nReply karo, main step-by-step guide karunga.`;
   }
 
-  // Get language selection message
-  getLanguageMessage() {
-    return `Choose Language:
-1 English
-2 Hindi
-3 Punjabi
-
-Reply with number 🔥`;
-  }
-
-  // Process user response and determine next step
-  processFlow(userData, userMessage) {
+  processFlow(userData = {}, userMessage = '') {
+    const message = userMessage.trim();
+    const normalized = message.toLowerCase();
     const currentStep = userData.flowStep || this.STEP.WELCOME;
-    const message = userMessage.toLowerCase().trim();
-    
-    // If user says hi/hello, start fresh
-    if (this.isGreeting(message)) {
+
+    if (this.isGreeting(normalized)) {
       return {
         message: this.getWelcomeMessage(),
         nextStep: this.STEP.GOAL,
-        userData: { flowStep: this.STEP.GOAL }
+        userData: { ...userData, flowStep: this.STEP.GOAL }
       };
+    }
+
+    if (this.isSteroidsQuestion(normalized)) {
+      return {
+        message: this.handleSteroidsQuestion(),
+        nextStep: currentStep,
+        userData
+      };
+    }
+
+    if (userData.freePlanDelivered && normalized === 'premium') {
+      return this.showPremiumPlans(userData);
+    }
+
+    if (this.isPremiumIntent(normalized) && !userData.freePlanDelivered) {
+      return this.startFreeAssessment(userData);
+    }
+
+    if (this.isWorkoutQuestion(normalized)) {
+      return this.handleWorkoutQuestion(userData);
     }
 
     switch (currentStep) {
       case this.STEP.WELCOME:
-        return this.handleWelcome(userData, message);
-      
+        return this.handleWelcome(userData, normalized);
       case this.STEP.GOAL:
         return this.handleGoal(userData, message);
-      
       case this.STEP.NAME:
         return this.handleName(userData, message);
-      
       case this.STEP.AGE:
-        return this.handleAge(userData, message);
-      
+        return this.handleAge(userData, normalized);
       case this.STEP.GENDER:
-        return this.handleGender(userData, message);
-      
-      case this.STEP.WEIGHT:
-        return this.handleWeight(userData, message);
-      
+        return this.handleGender(userData, normalized);
       case this.STEP.HEIGHT:
-        return this.handleHeight(userData, message);
-      
-      case this.STEP.TIMELINE:
-        return this.handleTimeline(userData, message);
-      
-      case this.STEP.WORKOUT_TYPE:
-        return this.handleWorkoutType(userData, message);
-      
-      case this.STEP.PLAN_SELECTION:
-        return this.handlePlanSelection(userData, message);
-      
-      case this.STEP.BASIC_PLAN:
-        return this.handleBasicPlan(userData, message);
-      
+        return this.handleHeight(userData, normalized);
+      case this.STEP.WEIGHT:
+        return this.handleWeight(userData, normalized);
+      case this.STEP.ACTIVITY_LEVEL:
+        return this.handleActivityLevel(userData, normalized);
+      case this.STEP.FOOD_PREFERENCE:
+        return this.handleFoodPreference(userData, normalized);
+      case this.STEP.MEDICAL_CONDITION:
+        return this.handleMedicalCondition(userData, message);
+      case this.STEP.FREE_PLAN:
+        return this.handleFreePlan(userData, normalized);
       case this.STEP.PREMIUM_PLAN:
-        return this.handlePremiumPlan(userData, message);
-      
+        return this.handlePremiumPlan(userData, normalized);
       case this.STEP.FOLLOW_UP:
-        return this.handleFollowUp(userData, message);
-      
+        return this.handleFollowUp(userData, normalized);
       default:
-        return {
-          message: this.getWelcomeMessage(),
-          nextStep: this.STEP.GOAL,
-          userData: { flowStep: this.STEP.GOAL }
-        };
+        return this.handleWelcome(userData, normalized);
     }
   }
 
   isGreeting(message) {
-    const greetings = ['hi', 'hello', 'hey', 'namaste', 'satsriyakal', 'hiya', 'hola'];
-    return greetings.some(g => message.includes(g));
+    const greetings = ['hi', 'hello', 'hey', 'namaste', 'hlo', 'hii', 'bhai', 'coach'];
+    return greetings.includes(message);
   }
 
-  handleWelcome(userData, message) {
-    // User said hi, show welcome message
-    return {
-      message: this.getWelcomeMessage(),
-      nextStep: this.STEP.GOAL,
-      userData: { ...userData, flowStep: this.STEP.GOAL }
-    };
+  isPremiumIntent(message) {
+    return /(premium|price|pricing|paid|plan|package|fees|charges|cost|kitna|service)/i.test(message);
+  }
+
+  isWorkoutQuestion(message) {
+    return /(exercise kaise karu|workout|exercise|kasrat|gym kaise|home workout)/i.test(message);
+  }
+
+  handleWelcome(userData) {
+    const nextStep = this.nextMissingStep(userData) || this.STEP.GOAL;
+    return this.askForStep(nextStep, userData);
   }
 
   handleGoal(userData, message) {
-    let goal = '';
-    
-    if (message.includes('fat loss') || message.includes('weight loss') || message.includes('1')) {
-      goal = 'Fat loss';
-    } else if (message.includes('weight gain') || message.includes('2')) {
-      goal = 'Weight gain';
-    } else if (message.includes('muscle gain') || message.includes('3')) {
-      goal = 'Muscle gain';
-    } else if (message.includes('strength') || message.includes('4')) {
-      goal = 'Strength';
-    } else if (message.includes('general') || message.includes('5')) {
-      goal = 'General fitness';
-    } else {
-      // Try to detect goal from message
-      if (message.includes('loss') || message.includes('fat') || message.includes('pet')) {
-        goal = 'Fat loss';
-      } else if (message.includes('muscle') || message.includes('bulk')) {
-        goal = 'Muscle gain';
-      } else if (message.includes('gain') || message.includes('weight')) {
-        goal = 'Weight gain';
-      } else {
-        return {
-          message: `Sorry Bhai! 🙏
-
-Please choose:
-• Fat loss
-• Weight gain  
-• Muscle gain
-• Strength
-• General fitness
-
-Reply with goal name 🔥`,
-          nextStep: this.STEP.GOAL,
-          userData: userData
-        };
-      }
+    const goal = this.parseGoal(message);
+    if (!goal) {
+      return this.retryStep(this.STEP.GOAL, userData, 'invalid_goal');
     }
 
+    const nextStep = this.nextMissingStep({ ...userData, goal }, this.STEP.NAME);
     return {
-      message: `Great choice! ${goal} ek excellent goal hai 💪
-
-Ab tell me:
-What is your name?`,
-      nextStep: this.STEP.NAME,
-      userData: { ...userData, goal, flowStep: this.STEP.NAME }
+      message: `Goal noted: ${goal}.\n\n${this.getPrompt(nextStep, userData)}`,
+      nextStep,
+      userData: { ...userData, goal, flowStep: nextStep }
     };
   }
 
   handleName(userData, message) {
-    // Extract name - take first few words as name
-    const name = message.replace(/[^a-zA-Z\s]/g, '').trim().split(/\s+/).slice(0, 2).join(' ');
-    
-    return {
-      message: `Nice to meet you, ${name}! 🙏
+    const name = message.replace(/[^a-zA-Z\s]/g, ' ').trim().split(/\s+/).slice(0, 3).join(' ');
+    if (!name) {
+      return this.retryStep(this.STEP.NAME, userData, 'name');
+    }
 
-Now tell me:
-What is your age?`,
-      nextStep: this.STEP.AGE,
-      userData: { ...userData, name, flowStep: this.STEP.AGE }
-    };
+    return this.askForNext({ ...userData, name }, this.STEP.AGE);
   }
 
   handleAge(userData, message) {
-    // Extract age
-    const ageMatch = message.match(/\b(\d{1,3})\b/);
-    if (!ageMatch || parseInt(ageMatch[1]) < 10 || parseInt(ageMatch[1]) > 100) {
-      return {
-        message: `Please enter valid age (10-100 years) 🙏`,
-        nextStep: this.STEP.AGE,
-        userData: userData
-      };
+    const match = message.match(/\b(\d{1,3})\b/);
+    const age = match ? Number(match[1]) : NaN;
+    if (!Number.isFinite(age) || age < 10 || age > 100) {
+      return this.retryStep(this.STEP.AGE, userData, 'invalid_age');
     }
 
-    const age = ageMatch[1];
-
-    return {
-      message: `Noted! ${age} years perfect age hai 💪
-
-Next:
-Male ya Female?`,
-      nextStep: this.STEP.GENDER,
-      userData: { ...userData, age, flowStep: this.STEP.GENDER }
-    };
+    return this.askForNext({ ...userData, age: String(age) }, this.STEP.GENDER);
   }
 
   handleGender(userData, message) {
-    let gender = '';
-    
-    if (message.includes('male') || message.includes('m') || message.includes('male') || message.includes('1') || message.includes('man') || message.includes('boy')) {
-      gender = 'Male';
-    } else if (message.includes('female') || message.includes('f') || message.includes('2') || message.includes('woman') || message.includes('girl')) {
-      gender = 'Female';
-    } else {
-      return {
-        message: `Please specify:
-Male ya Female?`,
-        nextStep: this.STEP.GENDER,
-        userData: userData
-      };
+    const gender = this.parseGender(message);
+    if (!gender) {
+      return this.retryStep(this.STEP.GENDER, userData, 'invalid_gender');
     }
 
-    return {
-      message: `${gender}? Great! 💪
-
-Ab tell me:
-What is your current weight? (kg)`,
-      nextStep: this.STEP.WEIGHT,
-      userData: { ...userData, gender, flowStep: this.STEP.WEIGHT }
-    };
-  }
-
-  handleWeight(userData, message) {
-    // Extract weight
-    const weightMatch = message.match(/\b(\d{1,3}(?:\.\d+)?)\b/);
-    if (!weightMatch || parseFloat(weightMatch[1]) < 20 || parseFloat(weightMatch[1]) > 300) {
-      return {
-        message: `Please enter valid weight in kg (20-300) 🙏`,
-        nextStep: this.STEP.WEIGHT,
-        userData: userData
-      };
-    }
-
-    const weight = weightMatch[1];
-
-    return {
-      message: `Noted! ${weight} kg 📝
-
-Ab tell me:
-What is your height? (feet'inches ya cm)`,
-      nextStep: this.STEP.HEIGHT,
-      userData: { ...userData, weight, flowStep: this.STEP.HEIGHT }
-    };
+    return this.askForNext({ ...userData, gender }, this.STEP.HEIGHT);
   }
 
   handleHeight(userData, message) {
-    let height = '';
-    
-    // Try to match feet'inches format
-    const feetMatch = message.match(/(\d+)'(\d+)?/);
-    if (feetMatch) {
-      height = `${feetMatch[1]}'${feetMatch[2] || '0'}"`;
-    } else {
-      // Try cm
-      const cmMatch = message.match(/(\d{2,3})\s*cm/i);
-      if (cmMatch) {
-        height = `${cmMatch[1]} cm`;
-      } else {
-        // Try just number
-        const numMatch = message.match(/(\d{2,3})/);
-        if (numMatch) {
-          const h = parseInt(numMatch[1]);
-          if (h > 100) {
-            height = `${h} cm`;
-          } else {
-            height = `${h}'`;
-          }
-        }
-      }
-    }
-
+    const height = this.parseHeight(message);
     if (!height) {
-      return {
-        message: `Please enter height properly:
-5'10" ya 178 cm format mein 🙏`,
-        nextStep: this.STEP.HEIGHT,
-        userData: userData
-      };
+      return this.retryStep(this.STEP.HEIGHT, userData, 'invalid_height');
     }
 
-    return {
-      message: `Perfect! ${height} 📝
+    return this.askForNext({ ...userData, height }, this.STEP.WEIGHT);
+  }
 
-Ab tell me:
-Kitne time mein result chahiye?
-(1 month / 3 month / 6 month / 1 year)`,
-      nextStep: this.STEP.TIMELINE,
-      userData: { ...userData, height, flowStep: this.STEP.TIMELINE }
+  handleWeight(userData, message) {
+    const match = message.match(/\b(\d{1,3}(?:\.\d+)?)\b/);
+    const weight = match ? Number(match[1]) : NaN;
+    if (!Number.isFinite(weight) || weight < 20 || weight > 300) {
+      return this.retryStep(this.STEP.WEIGHT, userData, 'invalid_weight');
+    }
+
+    return this.askForNext({ ...userData, weight: String(weight).replace(/\.0$/, '') }, this.STEP.GOAL);
+  }
+
+  handleActivityLevel(userData, message) {
+    const activityLevel = this.parseActivityLevel(message);
+    if (!activityLevel) {
+      return this.retryStep(this.STEP.ACTIVITY_LEVEL, userData, 'invalid_activity');
+    }
+
+    return this.askForNext({ ...userData, activityLevel }, this.STEP.FOOD_PREFERENCE);
+  }
+
+  handleFoodPreference(userData, message) {
+    const foodPreference = this.parseFoodPreference(message);
+    if (!foodPreference) {
+      return this.retryStep(this.STEP.FOOD_PREFERENCE, userData, 'invalid_food');
+    }
+
+    return this.askForNext({ ...userData, foodPreference }, this.STEP.MEDICAL_CONDITION);
+  }
+
+  handleMedicalCondition(userData, message) {
+    const medicalCondition = this.normalizeMedicalCondition(message);
+    const finalUserData = {
+      ...userData,
+      medicalCondition,
+      freePlanDelivered: true,
+      flowStep: this.STEP.FREE_PLAN
+    };
+
+    return {
+      message: this.buildFreePlan(finalUserData),
+      nextStep: this.STEP.FREE_PLAN,
+      userData: finalUserData
     };
   }
 
-  handleTimeline(userData, message) {
-    let timeline = '';
-    
-    if (message.includes('1 month') || message.includes('1month') || message.includes('30')) {
-      timeline = '1 month';
-    } else if (message.includes('3 month') || message.includes('3month') || message.includes('3')) {
-      timeline = '3 months';
-    } else if (message.includes('6 month') || message.includes('6month') || message.includes('6')) {
-      timeline = '6 months';
-    } else if (message.includes('1 year') || message.includes('12 month') || message.includes('1year')) {
-      timeline = '1 year';
-    } else {
-      return {
-        message: `Please specify timeline:
-1 month / 3 month / 6 month / 1 year`,
-        nextStep: this.STEP.TIMELINE,
-        userData: userData
-      };
+  handleFreePlan(userData, message) {
+    if (message === 'premium' || this.isPremiumIntent(message)) {
+      return this.showPremiumPlans(userData);
     }
 
     return {
-      message: `${timeline}? Great target! 🎯
-
-Last question:
-Gym workout karein ya home workout?`,
-      nextStep: this.STEP.WORKOUT_TYPE,
-      userData: { ...userData, timeline, flowStep: this.STEP.WORKOUT_TYPE }
-    };
-  }
-
-  handleWorkoutType(userData, message) {
-    let workoutType = '';
-    
-    if (message.includes('gym') || message.includes('1')) {
-      workoutType = 'Gym';
-    } else if (message.includes('home') || message.includes('2')) {
-      workoutType = 'Home';
-    } else {
-      return {
-        message: `Please choose:
-1 Gym
-2 Home workout`,
-        nextStep: this.STEP.WORKOUT_TYPE,
-        userData: userData
-      };
-    }
-
-    // Build user summary
-    const summary = `Perfect! Ab aapka profile ready hai 📋
-
-📝 *Your Details:*
-Name: ${userData.name}
-Age: ${userData.age}
-Gender: ${userData.gender}
-Weight: ${userData.weight} kg
-Height: ${userData.height}
-Goal: ${userData.goal}
-Timeline: ${userData.timeline}
-Workout: ${workoutType}
-
-Ab choose karein apna plan 🔥`;
-
-    return {
-      message: summary,
-      nextStep: this.STEP.PLAN_SELECTION,
-      userData: { ...userData, workoutType, flowStep: this.STEP.PLAN_SELECTION }
-    };
-  }
-
-  handlePlanSelection(userData, message) {
-    // Check if user wants premium
-    if (message.includes('premium') || message.includes('2') || message.includes('guide')) {
-      return {
-        message: this.getPremiumPlanMessage(),
-        nextStep: this.STEP.PREMIUM_PLAN,
-        userData: { ...userData, selectedPlan: 'premium', flowStep: this.STEP.PREMIUM_PLAN }
-      };
-    }
-
-    // Default to basic or if user chooses basic
-    return {
-      message: this.getBasicPlanMessage(),
-      nextStep: this.STEP.BASIC_PLAN,
-      userData: { ...userData, selectedPlan: 'basic', flowStep: this.STEP.BASIC_PLAN }
-    };
-  }
-
-  getBasicPlanMessage() {
-    return `✅ *BASIC FREE PLAN*
-
-Yeh raha aapka free guidance:
-
-🥗 *Basic Diet Tips:*
-1. Subah khali pet ek glass pani piyein
-2. Lunch mein protein zaroor lein
-3. Dinner light rakhna hai
-4. Sugar aur refined oil kam karein
-5. Rozana 8 glass pani piyein
-
-🍽️ *Basic Meal Plan:*
-• Breakfast: 2 roti + sabzi + chaas
-• Lunch: 3 roti + dal + salad
-• Snacks: Fruits ya nuts
-• Dinner: 2 roti + light sabzi
-
-💪 *Basic Workout Schedule:*
-• Monday: Full body cardio
-• Tuesday: Rest
-• Wednesday: Strength training
-• Thursday: Rest
-• Friday: Cardio
-• Saturday: Active rest
-• Sunday: Rest
-
-😴 *Basic Sleep Tips:*
-• 7-8 hours sleep zaroori
-• Sleep se pehle phone nahi
-• Light dinner
-
-💧 *Water Intake:*
-• Roz 3-4 litre pani
-• Workout se pehle 1 glass
-• Workout ke baad 1 glass
-
----
-
-Agar personalized fast result chahiye toh Premium available hai 🔥
-
-1 Basic (Free) - Done
-2 Premium Guide Plan
-
-Reply with option 🔥`;
-  }
-
-  handleBasicPlan(userData, message) {
-    // User got basic plan, now follow up
-    return {
-      message: `Perfect! ${userData.name} bhai, yeh plan follow karein 💪
-
-Koi bhi question ho toh pooch sakte hain!
-
-Agar aapko fast results chahiye toh main aapko Premium Guide de sakta hoon jisme:
-
-✓ Custom diet chart
-✓ Personal trainer guidance  
-✓ Weekly tracking
-✓ Daily motivation
-
-Ready ho toh batao 🔥`,
+      message: this.composeFollowUp(userData),
       nextStep: this.STEP.FOLLOW_UP,
       userData: { ...userData, flowStep: this.STEP.FOLLOW_UP }
     };
   }
 
-  getPremiumPlanMessage() {
-    return `🔥 *PREMIUM GUIDE PLAN*
-
-Choose service:
-
-*1. Monthly Diet Chart - ₹499*
-Custom monthly diet according to your goal
-
-*2. Beginner Exercise Chart - ₹499*
-30-day beginner workout plan
-
-*3. Your Personal Trainer:*
-┌─────────────────┐
-│ 1 Month  - ₹1999 │
-│ 3 Month  - ₹3999 │
-│ 6 Month  - ₹6999 │
-│ 12 Month - ₹9999 │
-└─────────────────┘
-
-*PERSONAL TRAINER FEATURES:*
-✓ Day 1 to last day full guidance
-✓ Weekly tracking
-✓ Weight progress monitoring
-✓ Habit correction push
-✓ Daily motivation tips
-✓ Custom plan by your lifestyle
-✓ Weekly workout changes
-✓ Aerobics/cardio guidance
-✓ Pro level mentorship
-
----
-
-Kis option mein interest hai?
-1 / 2 / 3 (Personal trainer)
-
-Reply with number 🔥`;
-  }
-
   handlePremiumPlan(userData, message) {
-    let service = '';
-    let price = '';
-    
-    if (message.includes('1')) {
-      service = 'Monthly Diet Chart';
-      price = '₹499';
-    } else if (message.includes('2')) {
-      service = 'Beginner Exercise Chart';
-      price = '₹499';
-    } else if (message.includes('3') || message.includes('personal')) {
-      service = 'Personal Trainer';
-      price = '₹1999-9999';
-    } else {
-      return {
-        message: `Please choose:
-1 Diet Chart - ₹499
-2 Exercise Chart - ₹499
-3 Personal Trainer`,
-        nextStep: this.STEP.PREMIUM_PLAN,
-        userData: userData
-      };
-    }
-
     return {
-      message: `Great choice! ${service} - ${price} 🙏
-
-Payment ke liye WhatsApp karenge:
-+91 98886 01933
-
-Payment confirm hone ke baad plan immediately start hoga! 💪
-
-Koi aur question ho toh pooch sakte hain 🔥`,
+      message: `Aap inme se jo option chaho choose kar sakte ho.\n\nPayment aur onboarding ke liye WhatsApp karo: +91 98886 01933\n\nAgar chaho to main plan samjha bhi deta hoon.`,
       nextStep: this.STEP.FOLLOW_UP,
-      userData: { ...userData, selectedService: service, selectedPrice: price, flowStep: this.STEP.FOLLOW_UP }
+      userData: { ...userData, flowStep: this.STEP.FOLLOW_UP }
     };
   }
 
   handleFollowUp(userData, message) {
-    const lower = message.toLowerCase();
-    
-    // If user wants to continue or has questions
-    if (lower.includes('yes') || lower.includes('haan') || lower.includes('ha') || lower.includes('premium') || lower.includes('guide')) {
-      return {
-        message: this.getPremiumPlanMessage(),
-        nextStep: this.STEP.PREMIUM_PLAN,
-        userData: { ...userData, flowStep: this.STEP.PREMIUM_PLAN }
-      };
-    }
-    
-    if (lower.includes('no') || lower.includes('nahi') || lower.includes('na') || lower.includes('basic') || lower.includes('done')) {
-      return {
-        message: `Perfect! ${userData.name} bhai, all the best for your fitness journey 💪
-
-Koi bhi time help chahiye toh message kar sakte hain!
-
-Stay fit, stay healthy! 🙏🔥`,
-        nextStep: this.STEP.FOLLOW_UP,
-        userData: { ...userData, flowStep: this.STEP.FOLLOW_UP }
-      };
+    if (message === 'premium' || this.isPremiumIntent(message)) {
+      return this.showPremiumPlans(userData);
     }
 
-    // Default follow up message
+    if (this.isWorkoutQuestion(message)) {
+      return this.handleWorkoutQuestion(userData);
+    }
+
     return {
-      message: `Bhai ready ho transformation ke liye? Main help karne ke liye yahin hoon 💪
-
-Koi question ho toh pooch sakte hain!`,
+      message: this.composeFollowUp(userData),
       nextStep: this.STEP.FOLLOW_UP,
-      userData: userData
+      userData: { ...userData, flowStep: this.STEP.FOLLOW_UP }
     };
   }
 
-  // Handle steroids question - never recommend
-  handleSteroidsQuestion() {
-    return `Bhai steroids lena bilkul safe nahi hai! 💉
+  startFreeAssessment(userData) {
+    const merged = {
+      ...userData,
+      premiumAskedEarly: true
+    };
+    const nextStep = this.nextMissingStep(merged, this.STEP.NAME);
 
-Natural training aur proper diet se hi best results milte hain.
-
-Maine aapko proper guidance dekar natural transformation kara sakta hoon. 
-
-Kya aap proper diet aur workout se transformation chahiye? 🙏`;
+    return {
+      message: nextStep === this.STEP.NAME
+        ? this.getPrompt('premium_gate', merged)
+        : `Premium details se pehle free basic plan complete karte hain.\n\n${this.getPrompt(nextStep, merged)}`,
+      nextStep,
+      userData: { ...merged, flowStep: nextStep }
+    };
   }
 
-  // Check if user is asking about steroids
+  askForNext(userData, fallbackStep) {
+    const nextStep = this.nextMissingStep(userData, fallbackStep);
+    if (!nextStep) {
+      const finalUserData = {
+        ...userData,
+        freePlanDelivered: true,
+        flowStep: this.STEP.FREE_PLAN
+      };
+      return {
+        message: this.buildFreePlan(finalUserData),
+        nextStep: this.STEP.FREE_PLAN,
+        userData: finalUserData
+      };
+    }
+
+    return {
+      message: this.getPrompt(nextStep, userData),
+      nextStep,
+      userData: { ...userData, flowStep: nextStep }
+    };
+  }
+
+  askForStep(step, userData) {
+    return {
+      message: this.getPrompt(step, userData),
+      nextStep: step,
+      userData: { ...userData, flowStep: step }
+    };
+  }
+
+  retryStep(step, userData, promptKey) {
+    return {
+      message: this.getPrompt(promptKey, userData),
+      nextStep: step,
+      userData: { ...userData, flowStep: step }
+    };
+  }
+
+  nextMissingStep(userData, fallbackStep = null) {
+    const order = [
+      [this.STEP.NAME, 'name'],
+      [this.STEP.AGE, 'age'],
+      [this.STEP.GENDER, 'gender'],
+      [this.STEP.HEIGHT, 'height'],
+      [this.STEP.WEIGHT, 'weight'],
+      [this.STEP.GOAL, 'goal'],
+      [this.STEP.ACTIVITY_LEVEL, 'activityLevel'],
+      [this.STEP.FOOD_PREFERENCE, 'foodPreference'],
+      [this.STEP.MEDICAL_CONDITION, 'medicalCondition']
+    ];
+
+    if (fallbackStep && !this.hasFieldForStep(userData, fallbackStep)) {
+      return fallbackStep;
+    }
+
+    const missing = order.find(([, field]) => !userData[field]);
+    return missing ? missing[0] : null;
+  }
+
+  hasFieldForStep(userData, step) {
+    const map = {
+      [this.STEP.NAME]: 'name',
+      [this.STEP.AGE]: 'age',
+      [this.STEP.GENDER]: 'gender',
+      [this.STEP.HEIGHT]: 'height',
+      [this.STEP.WEIGHT]: 'weight',
+      [this.STEP.GOAL]: 'goal',
+      [this.STEP.ACTIVITY_LEVEL]: 'activityLevel',
+      [this.STEP.FOOD_PREFERENCE]: 'foodPreference',
+      [this.STEP.MEDICAL_CONDITION]: 'medicalCondition'
+    };
+    return Boolean(userData[map[step]]);
+  }
+
+  getPrompt(key, userData) {
+    const variants = this.promptVariants[key] || this.promptVariants.name;
+    const lastPromptKey = userData.lastPromptKey;
+    let index = Number(userData.promptVariantIndex || 0);
+
+    if (lastPromptKey === key) {
+      index += 1;
+    } else {
+      index = 0;
+    }
+
+    const selected = variants[index % variants.length];
+    userData.lastPromptKey = key;
+    userData.promptVariantIndex = index % variants.length;
+    return selected;
+  }
+
+  parseGoal(message) {
+    if (/(weight loss|fat loss|loss|fat|slim|pet)/i.test(message)) return 'Weight Loss';
+    if (/(muscle gain|muscle|bulk|bodybuilding|strength)/i.test(message)) return 'Muscle Gain';
+    if (/(weight gain|gain|skinny|dubla)/i.test(message)) return 'Weight Gain';
+    return '';
+  }
+
+  parseGender(message) {
+    if (/(^|\b)(male|man|boy|m)(\b|$)/i.test(message)) return 'Male';
+    if (/(^|\b)(female|woman|girl|f)(\b|$)/i.test(message)) return 'Female';
+    return '';
+  }
+
+  parseHeight(message) {
+    const feetInches = message.match(/(\d+)\s*'\s*(\d{1,2})?/);
+    if (feetInches) {
+      return `${feetInches[1]}'${feetInches[2] || '0'}"`;
+    }
+
+    const altFeet = message.match(/(\d+)\s*feet?\s*(\d{1,2})?\s*inch?/i);
+    if (altFeet) {
+      return `${altFeet[1]}'${altFeet[2] || '0'}"`;
+    }
+
+    const cm = message.match(/(\d{2,3})\s*cm/i);
+    if (cm) {
+      return `${cm[1]} cm`;
+    }
+
+    return '';
+  }
+
+  parseActivityLevel(message) {
+    if (message.includes('low')) return 'Low';
+    if (message.includes('moderate') || message.includes('medium')) return 'Moderate';
+    if (message.includes('high')) return 'High';
+    return '';
+  }
+
+  parseFoodPreference(message) {
+    if (/(non[\s-]?veg|nonveg|chicken|egg|anda)/i.test(message)) return 'Non-Veg';
+    if (/(veg|vegetarian|paneer|dal)/i.test(message)) return 'Veg';
+    return '';
+  }
+
+  normalizeMedicalCondition(message) {
+    const cleaned = message.trim();
+    if (!cleaned) return 'No medical condition';
+    if (/(no|none|nahi|nothing)/i.test(cleaned)) return 'No medical condition';
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  }
+
+  buildFreePlan(userData) {
+    const goal = String(userData.goal || '').toLowerCase();
+    const isVeg = userData.foodPreference === 'Veg';
+    const profile = `🔹 Client Profile:\nName: ${userData.name}\nGoal: ${userData.goal}\nWeight: ${userData.weight} kg\nHeight: ${userData.height}`;
+
+    let morning = '';
+    let breakfast = '';
+    let snack = '';
+    let lunch = '';
+    let evening = '';
+    let dinner = '';
+    let bonusTip = '';
+
+    if (goal.includes('loss')) {
+      morning = '1 glass warm water + 5 soaked almonds';
+      breakfast = isVeg ? 'Oats + curd + 1 fruit' : '2 boiled eggs + oats + 1 fruit';
+      snack = 'Apple ya cucumber salad';
+      lunch = isVeg ? '2 roti + dal + salad + sabzi' : '2 roti + grilled chicken + salad';
+      evening = 'Green tea + roasted chana';
+      dinner = isVeg ? '1-2 roti + paneer bhurji + salad' : 'Saute vegetables + egg bhurji or chicken soup';
+      bonusTip = 'Extra tip: daily 8k to 10k steps rakho, fat loss faster hoga.';
+    } else if (goal.includes('weight gain')) {
+      morning = '1 banana shake with milk and peanuts';
+      breakfast = isVeg ? 'Paneer sandwich + milk' : '4 eggs + bread + milk';
+      snack = 'Banana + dates + nuts';
+      lunch = isVeg ? '4 roti + dal + rice + paneer' : 'Rice + chicken + curd + 2 roti';
+      evening = 'Peanut chikki + lassi';
+      dinner = isVeg ? 'Rice + soya or paneer + curd' : 'Rice + fish/chicken + vegetables';
+      bonusTip = 'Extra tip: har meal mein calorie-dense food add karo, warna weight gain slow hoga.';
+    } else {
+      morning = '1 glass water + 5 soaked almonds + 1 banana';
+      breakfast = isVeg ? 'Besan chilla + curd + sprouts' : 'Omelette + oats + fruit';
+      snack = 'Greek yogurt ya fruit with peanuts';
+      lunch = isVeg ? '2-3 roti + paneer/dal + rice + salad' : '2-3 roti + chicken + rice + salad';
+      evening = 'Black coffee ya tea + roasted makhana';
+      dinner = isVeg ? 'Paneer + sabzi + 2 roti' : 'Eggs or chicken + vegetables + 2 roti';
+      bonusTip = 'Extra tip: muscle gain ke liye protein har meal mein include karo.';
+    }
+
+    return `${profile}
+
+🔹 Diet Plan:
+
+🌅 Morning (Empty Stomach)
+${morning}
+
+🥣 Breakfast
+${breakfast}
+
+🍎 Mid-Morning Snack
+${snack}
+
+🍛 Lunch
+${lunch}
+
+☕ Evening Snack
+${evening}
+
+🍽 Dinner
+${dinner}
+
+Medical Note: ${userData.medicalCondition}
+${bonusTip}
+
+This is our FREE BASIC PLAN.
+For a more personalized and result-driven transformation, type 👉 PREMIUM`;
+  }
+
+  showPremiumPlans(userData) {
+    return {
+      message: this.getPremiumPlansMessage(),
+      nextStep: this.STEP.PREMIUM_PLAN,
+      userData: { ...userData, flowStep: this.STEP.PREMIUM_PLAN, freePlanDelivered: true }
+    };
+  }
+
+  getPremiumPlansMessage() {
+    return `💎 OUR PREMIUM PLANS:
+
+1️⃣ Monthly Diet Plan – ₹499
+✔ Customized as per your goal
+✔ One-time plan for 1 month
+✔ Based on your body details
+
+2️⃣ Premium Transformation – ₹1999/month
+✔ Detailed body analysis
+✔ Lifestyle & habit tracking
+✔ Medical & food preference consideration
+✔ Monthly updated diet plans
+
+3️⃣ Personal Trainer
+💰 Pricing:
+- 1 Month – ₹3999
+- 3 Months – ₹4999
+- 6 Months – ₹7999
+- 12 Months – ₹11111
+
+🚀 Features:
+✔ Daily guidance (Day 1 to Day End)
+✔ Weekly progress tracking
+✔ Weight monitoring
+✔ Habit correction
+✔ Daily motivation
+✔ Nutrition guidance
+✔ Custom workout plans
+✔ Weekly workout updates
+✔ Cardio planning
+✔ Pro-level mentorship
+
+4️⃣ Special Guidance Plan
+
+Beginner Plan – ₹499
+✔ 1 month exercise chart only
+
+Intermediate Plan – ₹1499
+✔ Monthly plan based on weight, height, target weight, and aim
+
+Pro Plan – ₹2999
+✔ Weekly diet with exercise chart
+✔ Weekly monitoring
+✔ Nutrition guidance
+✔ Force to follow exercise and diet
+
+Reply with the service name that fits you best.`;
+  }
+
+  handleWorkoutQuestion(userData) {
+    const goal = String(userData.goal || '').toLowerCase();
+
+    if (goal.includes('loss')) {
+      return {
+        message: `Beginner workout for Weight Loss:\n1. 20 min brisk walk\n2. 3 sets squats x 12\n3. 3 sets wall push-ups x 10\n4. 3 sets plank x 20 sec\n5. 10 min light stretching\n\nTip: workout ke baad junk mat khao, warna calorie deficit break ho jata hai.`,
+        nextStep: userData.flowStep || this.STEP.FOLLOW_UP,
+        userData
+      };
+    }
+
+    if (goal.includes('weight gain')) {
+      return {
+        message: `Beginner workout for Weight Gain:\n1. 3 sets bodyweight squats x 10\n2. 3 sets incline push-ups x 8\n3. 3 sets glute bridge x 12\n4. 3 sets chair dips x 8\n5. 5 min mobility\n\nTip: workout ke 60 minutes ke andar proper meal lo.`,
+        nextStep: userData.flowStep || this.STEP.FOLLOW_UP,
+        userData
+      };
+    }
+
+    return {
+      message: `Beginner workout for Muscle Gain:\n1. 3 sets squats x 12\n2. 3 sets push-ups x 8\n3. 3 sets lunges x 10 each leg\n4. 3 sets plank x 30 sec\n5. 3 sets superman hold x 15 sec\n\nTip: same workout 3-4 weeks consistently karo, phir reps increase karo.`,
+      nextStep: userData.flowStep || this.STEP.FOLLOW_UP,
+      userData
+    };
+  }
+
+  composeFollowUp(userData) {
+    return `Plan ready hai, ${userData.name || 'bhai'}.\n\n${this.getPrompt('follow_up', userData)}`;
+  }
+
+  handleSteroidsQuestion() {
+    return `Bhai steroids safe shortcut nahi hote.\n\nNatural training, proper diet, aur consistency se hi long-term body banti hai.\nAgar chaho to main tumhare goal ke hisaab se natural plan set kar deta hoon.`;
+  }
+
   isSteroidsQuestion(message) {
-    return message.includes('steroid') || message.includes('anabolic') || message.includes('dbol') || 
-           message.includes('testosterone') || message.includes('creatine') || message.includes('supplement');
+    return /(steroid|anabolic|dbol|testosterone|pct|cycle|gear)/i.test(message);
   }
 }
 

@@ -667,14 +667,7 @@ const baileysLogger = pino({ level: 'error' });
           '';
         if (!text.trim()) continue;
         cleanupCooldowns();
-        
-        // CRITICAL: Per-user cooldown check
-        if (hasCooldown(userId)) {
-          console.log('⏳ User on cooldown:', userId);
-          log.info('user_on_cooldown', { userId, textLength: text.length });
-          continue;
-        }
-        
+
         console.log('📨 Processing:', userId, text.substring(0, 50));
         log.info('message_processing_start', {
           userId,
@@ -683,11 +676,8 @@ const baileysLogger = pino({ level: 'error' });
           processingUsersCount: processingUsers.size
         });
         processingUsers.add(userId);
-        
+
         try {
-          // Short anti-spam cooldown so normal chat still replies fast
-          updateCooldown(userId, 3);
-          
           // 🔥 STEP 3: FULL PROFESSIONAL FLOW
           const { intent } = intentHandler.detectIntent(userId, text);
           console.log('🎯 Intent detected:', intent);
