@@ -255,6 +255,11 @@ app.get('/stats', (req, res) => {
     timestamp: new Date().toISOString()
   });
   
+  // Job submissions metric
+  const jobSubmissionsCount = (() => {
+    try { const jobStore = require('./jobStore'); return jobStore.getRecent(200).length; } catch(e) { return 0; }
+  })();
+  
   res.json({
     timestamp: new Date().toISOString(),
     bot: {
@@ -272,6 +277,7 @@ app.get('/stats', (req, res) => {
       total: totalConversations,
       active: activeConversations,
       inactivePremium: inactivePremiumUsers.length,
+      jobSubmissions: jobSubmissionsCount,
       processingUsers: processingUsers.size,
       cooldownUsers: cooldownUsers.size,
       avgMessagesPerConversation: parseFloat(avgMessagesPerConversation),
@@ -295,13 +301,30 @@ app.get('/stats', (req, res) => {
       arch: process.arch
     },
     logs: 'bot.log | bot-error.log',
-    endpoints: {
+      endpoints: {
       status: '/api/status',
       qr: '/qr',
       qrPng: '/qr.png',
       stats: '/stats'
     }
   });
+});
+
+// Admin: view recent job submissions (basic HTML)
+app.get('/admin/jobs', (req, res) => {
+  try {
+    const jobStore = require('./jobStore');
+    const subs = jobStore.getRecent(100);
+    let html = `<html><head><title>Job Submissions</title><meta charset="utf-8"/></head><body><h1>Recent Job Submissions (${subs.length})</h1><ul>`;
+    for (const s of subs) {
+      html += `<li><strong>${s.role}</strong> — ${s.experience} — ${s.location} — ${s.contact} <br/><small>from: ${s.userId} • ${s.createdAt}</small></li>`;
+    }
+    html += `</ul></body></html>`;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (err) {
+    res.status(500).send('Error loading job submissions');
+  }
 });
 app.get('/qr', (req, res) => res.send(renderQrPage({
   hasQr: !!currentQR,

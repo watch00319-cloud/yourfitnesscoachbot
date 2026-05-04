@@ -1,4 +1,5 @@
 const userStore = require('./userStore');
+const jobStore = require('./jobStore');
 
 class JobService {
   constructor() {
@@ -39,6 +40,22 @@ Ab final step: apna contact share karo (WhatsApp number ya email) taaki hum foll
 
       case this.STEP.CONTACT:
         userStore.setUser(userId, { jobContact: msg, jobStep: this.STEP.DONE });
+        // Persist submission for admin review
+        try {
+          const u = userStore.getUser(userId) || {};
+          const submission = {
+            userId,
+            name: u.name || 'N/A',
+            role: u.jobRole || 'N/A',
+            experience: u.jobExperience || 'N/A',
+            location: u.jobLocation || 'N/A',
+            contact: msg
+          };
+          jobStore.addSubmission(submission);
+        } catch (err) {
+          console.error('jobService: failed to store submission', err.message);
+        }
+
         return { reply: `Shukriya! Hum aapke liye best matches dhoondhenge aur jaldi contact karenge. Agar aur kuch add karna ho, abhi bata sakte ho.`, done: true };
 
       default:
