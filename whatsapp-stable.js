@@ -6,6 +6,7 @@ const express = require('express');
 const winston = require('winston');
 const pino = require('pino');
 const QRCode = require('qrcode');
+const s3Sync = require('./s3-sync');
 
 // 🧠 PROFESSIONAL MODULES
 const config = require('./config');
@@ -472,8 +473,15 @@ function resetAuthState() {
   } catch (error) {
     console.error('❌ Failed to reset auth directory:', error.message);
   }
-
   fs.mkdirSync(AUTH_DIR, { recursive: true });
+  // If S3 backup is configured, also remove stored auth there
+  if (process.env.S3_BUCKET) {
+    s3Sync.deleteAuth(AUTH_DIR).then(() => {
+      log.info('s3_auth_deleted_on_reset', { authDir: AUTH_DIR });
+    }).catch((e) => {
+      log.warn('s3_delete_failed', { error: e.message });
+    });
+  }
   currentQR = null;
   hasOpenedBrowserForQR = false;
   isPairingRequested = false;
@@ -522,6 +530,17 @@ const baileysLogger = pino({ level: 'error' });
     });
     
     sock.ev.on('creds.update', saveCreds);
+    // Also upload auth files to S3 (if configured) so auth persists across restarts
+    if (process.env.S3_BUCKET) {
+      sock.ev.on('creds.update', async () => {
+        try {
+          await s3Sync.uploadAuth(AUTH_DIR);
+          log.info('s3_auth_uploaded', { authDir: AUTH_DIR });
+        } catch (e) {
+          log.warn('s3_upload_failed', { error: e.message });
+        }
+      });
+    }
 
     sock.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect, qr, pairingCode } = update;
@@ -830,6 +849,18 @@ const baileysLogger = pino({ level: 'error' });
   }
 }
 
-startBot();
+// Download auth from S3 (if configured) then start bot
+(async () => {
+  if (process.env.S3_BUCKET) {
+    try {
+      console.log('⬇️ Downloading auth_info from S3 (if available)');
+      await s3Sync.downloadAuth(AUTH_DIR);
+      log.info('s3_auth_downloaded', { authDir: AUTH_DIR });
+    } catch (e) {
+      log.warn('s3_download_failed', { error: e.message });
+    }
+  }
+  startBot();
+})();
 
 process.on('SIGINT', () => process.exit(0));

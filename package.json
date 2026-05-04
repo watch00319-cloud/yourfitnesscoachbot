@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@aws-sdk/client-s3": "^3.330.0",
     "@whiskeysockets/baileys": "^6.7.17",
     "canvas": "^3.2.3",
     "dotenv": "^17.4.2",
