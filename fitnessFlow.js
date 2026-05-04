@@ -55,17 +55,17 @@ class FitnessFlow {
         `Target clear karte hain. Goal batao: Weight Loss / Weight Gain / Muscle Gain.`,
         `Ab goal likho: Weight Loss, Weight Gain, ya Muscle Gain.`
       ],
-      activity: [
+      activity_level: [
         `Activity level kya hai: Low, Moderate, ya High?`,
         `Roz ka activity level share karo: Low / Moderate / High.`,
         `Lifestyle ke hisaab se activity level batao.`
       ],
-      food: [
+      food_preference: [
         `Food preference kya hai: Veg ya Non-Veg?`,
         `Diet customize karne ke liye batao: Veg ya Non-Veg?`,
         `Ab food preference share karo.`
       ],
-      medical: [
+      medical_condition: [
         `Koi medical condition, allergy, ya digestion issue hai? Nahi hai to "No medical condition" likh do.`,
         `Last detail: koi medical issue ya allergy? Agar nahi hai to "No medical condition" bhej do.`,
         `Bas ek last cheez. Medical condition ya injury hai kya?`
@@ -440,8 +440,8 @@ class FitnessFlow {
 
   parseGoal(message) {
     if (/(weight loss|fat loss|loss|fat|slim|pet)/i.test(message)) return 'Weight Loss';
-    if (/(weight gain|gain|skinny|dubla)/i.test(message)) return 'Weight Gain';
     if (/(muscle gain|muscle|bulk|bodybuilding|strength)/i.test(message)) return 'Muscle Gain';
+    if (/(weight gain|gain|skinny|dubla)/i.test(message)) return 'Weight Gain';
     return '';
   }
 
