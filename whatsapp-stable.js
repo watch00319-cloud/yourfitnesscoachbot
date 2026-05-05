@@ -27,7 +27,7 @@ const seenMessages = new Map();
 let currentQR = null;
 let sock = null;
 
-const PHONE_NUMBER = '919888601933';
+const PHONE_NUMBER = process.env.WHATSAPP_PHONE || '919888601933';
 const AUTH_DIR = './auth_info';
 const LOCK_FILE = path.join(__dirname, 'bot.instance.lock');
 const PORT = Number(process.env.PORT || 3000);
