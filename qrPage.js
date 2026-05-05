@@ -10,22 +10,26 @@ function escapeHtml(value) {
 function renderQrPage({ hasQr, connected, status, port } = {}) {
   const safeStatus = escapeHtml(status || 'Starting...');
   const dashboardUrl = port ? `http://localhost:${port}` : '/';
-  const body = hasQr
-    ? `<h1>Scan this QR</h1>
-       <img class="qr" src="/qr.png?t=${Date.now()}" alt="WhatsApp QR code">
-       <p>Open WhatsApp > Linked Devices > Link a Device.</p>`
+
+  const initialHeading = hasQr
+    ? 'Scan this QR'
     : connected
-      ? `<h1>Bot is already connected</h1>
-         <p>QR is hidden because WhatsApp is already linked.</p>
+      ? 'Bot is already connected'
+      : 'Waiting for QR';
+
+  const initialBody = hasQr
+    ? `<img class="qr" id="qr-img" src="/qr.png?t=${Date.now()}" alt="WhatsApp QR code">
+       <p>Open WhatsApp &gt; Linked Devices &gt; Link a Device.</p>`
+    : connected
+      ? `<p>QR is hidden because WhatsApp is already linked.</p>
          <p>To generate a new QR, the saved auth session must be reset first.</p>`
-      : `<h1>Waiting for QR</h1>
-         <p>No QR is available yet. Keep this page open; it refreshes automatically.</p>`;
+      : `<img class="qr" id="qr-img" src="" alt="WhatsApp QR code" style="display:none">
+         <p id="waiting-msg">No QR is available yet. Checking automatically&hellip;</p>`;
 
   return `<!DOCTYPE html>
 <html>
 <head>
   <title>WhatsApp Bot QR</title>
-  <meta http-equiv="refresh" content="3">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -77,10 +81,72 @@ function renderQrPage({ hasQr, connected, status, port } = {}) {
 </head>
 <body>
   <main>
-    ${body}
-    <div class="status">Status: ${safeStatus}</div>
+    <h1 id="heading">${escapeHtml(initialHeading)}</h1>
+    ${initialBody}
+    <div class="status" id="status-text">Status: ${safeStatus}</div>
     <p><a href="${escapeHtml(dashboardUrl)}">Open dashboard</a></p>
   </main>
+  <script>
+    (function () {
+      var qrRefreshInterval = null;
+
+      function refreshQrImage() {
+        var img = document.getElementById('qr-img');
+        if (img) {
+          img.src = '/qr.png?t=' + Date.now();
+        }
+      }
+
+      function applyState(data) {
+        var heading = document.getElementById('heading');
+        var statusText = document.getElementById('status-text');
+        var waitingMsg = document.getElementById('waiting-msg');
+        var img = document.getElementById('qr-img');
+
+        if (statusText && data.status) {
+          statusText.textContent = 'Status: ' + data.status;
+        }
+
+        if (data.connected) {
+          if (heading) heading.textContent = 'Bot is already connected';
+          if (img) img.style.display = 'none';
+          if (waitingMsg) waitingMsg.style.display = 'none';
+          if (qrRefreshInterval) {
+            clearInterval(qrRefreshInterval);
+            qrRefreshInterval = null;
+          }
+        } else if (data.qr) {
+          if (heading) heading.textContent = 'Scan this QR';
+          if (waitingMsg) waitingMsg.style.display = 'none';
+          if (img) {
+            img.src = '/qr.png?t=' + Date.now();
+            img.style.display = '';
+          }
+          if (!qrRefreshInterval) {
+            qrRefreshInterval = setInterval(refreshQrImage, 2000);
+          }
+        } else {
+          if (heading) heading.textContent = 'Waiting for QR';
+          if (img) img.style.display = 'none';
+          if (waitingMsg) waitingMsg.style.display = '';
+          if (qrRefreshInterval) {
+            clearInterval(qrRefreshInterval);
+            qrRefreshInterval = null;
+          }
+        }
+      }
+
+      function poll() {
+        fetch('/api/status')
+          .then(function (r) { return r.json(); })
+          .then(function (data) { applyState(data); })
+          .catch(function () { /* ignore transient errors */ });
+      }
+
+      setInterval(poll, 1000);
+      poll();
+    })();
+  </script>
 </body>
 </html>`;
 }
