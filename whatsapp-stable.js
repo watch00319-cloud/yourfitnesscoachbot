@@ -24,6 +24,7 @@ const { parseFitnessDetails } = require('./profileParser');
 const processingUsers = new Set();
 const cooldownUsers = new Map();
 const seenMessages = new Map();
+const recentReplies = new Map(); // Outbound dedupe 30s TTL
 let currentQR = null;
 let sock = null;
 
@@ -523,9 +524,9 @@ const baileysLogger = pino({ level: 'error' });
       browser: Browsers.ubuntu('Chrome'),
       syncFullHistory: false,
       markOnlineOnConnect: false,
-      defaultQueryTimeoutMs: 60000,
-      connectTimeoutMs: 60000,
-      keepAliveIntervalMs: 30000,
+      defaultQueryTimeoutMs: 120000,
+      connectTimeoutMs: 120000,
+      keepAliveIntervalMs: 60000,
       generateHighQualityLinkPreview: false
     });
     
@@ -701,7 +702,7 @@ const baileysLogger = pino({ level: 'error' });
         if (messageId) markSeenMessage(messageId);
         
         const userId = m.key.remoteJid;
-        if (!userId || processingUsers.has(userId)) continue;
+        if (!userId || userId?.endsWith('@broadcast') || processingUsers.has(userId)) continue;
         const text =
           m.message.conversation ||
           m.message.extendedTextMessage?.text ||
@@ -835,8 +836,10 @@ const baileysLogger = pino({ level: 'error' });
     console.log('🚀 Bot started - waiting for WhatsApp auth...');
     log.info('bot_startup_completed', {
       port: activePort,
-      status: 'waiting_for_auth'
+      status: 'waiting_for_auth',
+      timeouts: '120s configured - crash fix applied'
     });
+    console.log('🔧 CRASH FIX: Baileys timeouts increased to 120s + broadcast filter');
   } catch (error) {
     console.error('💥 Startup error:', error.message);
     log.error('bot_startup_failed', {

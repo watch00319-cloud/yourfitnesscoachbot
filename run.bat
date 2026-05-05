@@ -3,7 +3,7 @@ setlocal
 :: Set the bot folder path
 cd /d "%~dp0"
 color 0E
-set "BOT_PORT=11000"
+set "BOT_PORT=3002"
 set "BOT_DISABLE_QR_OPEN=false"
 
 :RESTART
@@ -33,7 +33,7 @@ echo [+] Internet connection active.
 echo [3/4] Starting the Bot Service...
 echo.
 :: Start the bot
-node "%~dp0index.js"
+node "%~dp0whatsapp-stable.js"
 
 set "EXIT_CODE=%ERRORLEVEL%"
 

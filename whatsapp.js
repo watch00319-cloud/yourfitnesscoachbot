@@ -7,10 +7,7 @@ const config = require('./config');
 const aiService = require('./aiService');
 const intentHandler = require('./intentHandler');
 const userStore = require('./userStore');
-const conversationStore = require('./conversationStore');
-
-// User states for analysis flow (phone -> state)
-const userStates = new Map();
+const conversationStore = require('./conversationStore');\nconst fitnessFlow = require('./fitnessFlow');\n\n// User states for analysis flow (phone -> state)\nconst userStates = new Map();
 
 // Welcome message
 const WELCOME_MSG = `*Namaste bhai! 🔥 Elite Fitness Coach yahan hu.* 
@@ -93,33 +90,7 @@ async function startBot() {
     console.log(`[${sender}] ${text || '📷'}`);
 
     const userData = userStore.getUser(sender);
-    const conv = conversationStore.getConversation(sender);
-    const state = userStates.get(sender);
-
-    // New chat welcome
-    if (!conv.userData.onboardingStatus || conv.isNewUser(sender)) {
-      await sock.sendMessage(from, { text: WELCOME_MSG });
-      conversationStore.completeOnboarding(sender);
-      return;
-    }
-
-    // Analysis flow
-    if (state && state.step) {
-      handleAnalysisStep(sock, from, sender, text, state);
-      return;
-    }
-
-    // Photo analysis (premium users or progress)
-    if (isImage && userData.premium_status) {
-      const analysis = await aiService.analyzePhoto(imageUrl.toString('base64'), userData);
-      await sock.sendMessage(from, { text: analysis });
-      userStore.setUser(sender, { last_photo_analyzed: Date.now() });
-      return;
-    }
-
-    // Intent & AI reply
-    const { enhanced, intent } = intentHandler.enhanceMessage(sender, text);
-    let reply = await aiService.generateReply(sender, enhanced, userData, intent);
+    const conv = conversationStore.getConversation(sender);\n    const state = userStates.get(sender);\n\n    // New chat welcome\n    if (!conv.userData.onboardingStatus || conv.isNewUser(sender)) {\n      await sock.sendMessage(from, { text: fitnessFlow.getWelcomeMessage() });\n      conversationStore.completeOnboarding(sender);\n      return;\n    }\n\n    // Analysis flow\n    if (state && state.step) {\n      handleAnalysisStep(sock, from, sender, text, state);\n      return;\n    }\n\n    // Photo analysis (premium users or progress)\n    if (isImage && userData.premium_status) {\n      const analysis = await aiService.analyzePhoto(imageUrl.toString('base64'), userData);\n      await sock.sendMessage(from, { text: analysis });\n      userStore.setUser(sender, { last_photo_analyzed: Date.now() });\n      return;\n    }\n\n    // 🚀 FITNESS FLOW INTEGRATION - Fix infinite loops\n    const flowResult = fitnessFlow.processFlow(userData, text);\n    \n    // If still in onboarding flow, use fitnessFlow & persist state\n    if (['welcome','goal','name','age','gender','height','weight','activity_level','food_preference','medical_condition'].includes(flowResult.nextStep)) {\n      userStore.setUser(sender, flowResult.userData);\n      await sock.sendMessage(from, { text: flowResult.message });\n      conversationStore.addMessage(sender, 'user', text);\n      conversationStore.addMessage(sender, 'model', flowResult.message);\n      return;\n    }\n\n    // Free plan delivered → fallback to AI\n    // Intent & AI reply\n    const { enhanced, intent } = intentHandler.enhanceMessage(sender, text);\n    let reply = await aiService.generateReply(sender, enhanced, userData, intent);
 
     // Post-process modes
     if (intent.intent === 'subscription' || /plan\s*chahiye|serious|transform/i.test(text)) {

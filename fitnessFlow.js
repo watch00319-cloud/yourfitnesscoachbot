@@ -258,7 +258,7 @@ class FitnessFlow {
       return this.retryStep(this.STEP.WEIGHT, userData, 'invalid_weight');
     }
 
-    return this.askForNext({ ...userData, weight: String(weight).replace(/\.0$/, '') }, this.STEP.GOAL);
+return this.askForNext({ ...userData, weight: String(weight).replace(/\.0$/, '') }, this.STEP.ACTIVITY_LEVEL);
   }
 
   handleActivityLevel(userData, message) {
