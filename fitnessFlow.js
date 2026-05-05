@@ -21,94 +21,130 @@ class FitnessFlow {
 
     this.promptVariants = {
       premium_gate: [
-        `Premium details dunga, but sabse pehle main aapko ek FREE BASIC PLAN bana deta hoon.\n\nStart karte hain. Aapka naam kya hai?`,
-        `Pehle free basic assessment kar lete hain, phir premium options dikhaunga.\n\nSabse pehle apna name bhejo.`,
-        `Bhai tension mat lo, premium bhi milega. Lekin best result ke liye pehle free basic plan ready karte hain.\n\nNaam batao.`
-      ],
-      name: [
-        `Chalo start karte hain. Aapka naam kya hai?`,
-        `Sabse pehle apna name bhej do.`,
-        `Quick start ke liye naam bata do.`
-      ],
-      age: [
-        `Nice. Ab age batao.`,
-        `Theek hai, ab apni age share karo.`,
-        `Good start. Ab age likho.`
-      ],
-      gender: [
-        `Ab gender batao: Male ya Female?`,
-        `Next detail: gender kya hai?`,
-        `Body plan personalize karne ke liye gender chahiye: Male ya Female?`
-      ],
-      height: [
-        `Ab height bhejo. Format: 172 cm ya 5'8".`,
-        `Height share karo. 170 cm ya 5'10" format chalega.`,
-        `Ab apni height bata do.`
-      ],
-      weight: [
-        `Weight batao in kg.`,
-        `Ab current weight bhejo. Example: 72 kg.`,
-        `Current body weight kitna hai?`
+        `Premium details dunga, but sabse pehle main aapko ek FREE BASIC PLAN bana deta hoon.\n\nPehle goal batao — Weight Loss, Weight Gain, ya Muscle Gain?`,
+        `Pehle free basic assessment kar lete hain, phir premium options dikhaunga.\n\nBatao, aapka target kya hai?`,
+        `Bhai tension mat lo, premium bhi milega. Lekin best result ke liye pehle free basic plan ready karte hain.\n\nGoal kya hai?`,
+        `Premium ke baare mein baad mein baat karte hain. Pehle aapka plan banate hain.\n\nWeight Loss, Weight Gain, ya Muscle Gain?`,
+        `Sabse pehle free plan bana deta hoon. Premium ka rasta baad mein khulenga.\n\nTo batao, goal kya hai?`
       ],
       goal: [
         `Aapka main goal kya hai: Weight Loss, Weight Gain, ya Muscle Gain?`,
         `Target clear karte hain. Goal batao: Weight Loss / Weight Gain / Muscle Gain.`,
-        `Ab goal likho: Weight Loss, Weight Gain, ya Muscle Gain.`
+        `Ab goal likho: Weight Loss, Weight Gain, ya Muscle Gain.`,
+        `Sabse important — aap kya chahte ho? Weight Loss, Weight Gain, ya Muscle Gain?`,
+        `Batao apna target. Teen option hain: Weight Loss, Weight Gain, Muscle Gain.`
+      ],
+      name: [
+        `Chalo start karte hain. Aapka naam kya hai?`,
+        `Sabse pehle apna name bhej do.`,
+        `Quick start ke liye naam bata do.`,
+        `Naam batao, plan personalize karne ke liye chahiye.`,
+        `Bhai pehle naam to batao, phir aage badhte hain.`
+      ],
+      age: [
+        `Nice. Ab age batao.`,
+        `Theek hai, ab apni age share karo.`,
+        `Good start. Ab age likho.`,
+        `Age kitni hai? Plan ke liye zaroori hai.`,
+        `Ab ek simple number — age kitni hai?`
+      ],
+      gender: [
+        `Ab gender batao: Male ya Female?`,
+        `Next detail: gender kya hai?`,
+        `Body plan personalize karne ke liye gender chahiye: Male ya Female?`,
+        `Male ya Female? Ye detail plan ko accurate banata hai.`,
+        `Gender share karo — Male ya Female?`
+      ],
+      height: [
+        `Ab height bhejo. Format: 172 cm ya 5'8".`,
+        `Height share karo. 170 cm ya 5'10" format chalega.`,
+        `Ab apni height bata do.`,
+        `Height kitni hai? cm ya feet-inch mein batao.`,
+        `Ek aur detail — height bhejo. Example: 175 cm.`
+      ],
+      weight: [
+        `Weight batao in kg.`,
+        `Ab current weight bhejo. Example: 72 kg.`,
+        `Current body weight kitna hai?`,
+        `Weight share karo — sirf number mein, kg mein.`,
+        `Ab batao, current weight kitna chal raha hai?`
       ],
       activity_level: [
         `Activity level kya hai: Low, Moderate, ya High?`,
         `Roz ka activity level share karo: Low / Moderate / High.`,
-        `Lifestyle ke hisaab se activity level batao.`
+        `Lifestyle ke hisaab se activity level batao.`,
+        `Daily routine kaisi hai? Low, Moderate, ya High activity?`,
+        `Kitna active rehte ho din mein? Low, Moderate, ya High?`
       ],
       food_preference: [
         `Food preference kya hai: Veg ya Non-Veg?`,
         `Diet customize karne ke liye batao: Veg ya Non-Veg?`,
-        `Ab food preference share karo.`
+        `Ab food preference share karo.`,
+        `Veg khate ho ya Non-Veg? Plan ispe depend karta hai.`,
+        `Ek aur cheez — Veg ya Non-Veg?`
       ],
       medical_condition: [
         `Koi medical condition, allergy, ya digestion issue hai? Nahi hai to "No medical condition" likh do.`,
         `Last detail: koi medical issue ya allergy? Agar nahi hai to "No medical condition" bhej do.`,
-        `Bas ek last cheez. Medical condition ya injury hai kya?`
+        `Bas ek last cheez. Medical condition ya injury hai kya?`,
+        `Koi health issue ya allergy? Nahi hai to "No medical condition" likh do. Bas!`,
+        `Final detail — medical condition kuch hai? Agar sab theek hai to "No medical condition" bhej do.`
       ],
       invalid_age: [
         `Valid age bhejo. 10 se 100 ke beech likho.`,
         `Age thoda clear format mein bhejo. Example: 27.`,
-        `Age samajh nahi aayi. Sirf number mein bhejo.`
+        `Age samajh nahi aayi. Sirf number mein bhejo.`,
+        `Ye samajh nahi aaya. Age sirf number mein likho, jaise 25.`,
+        `Age dobara bhejo — sirf number, 10 se 100 ke beech.`
       ],
       invalid_gender: [
         `Gender clearly likho: Male ya Female.`,
         `Please Male ya Female mein reply karo.`,
-        `Ye detail clear chahiye. Male ya Female?`
+        `Ye detail clear chahiye. Male ya Female?`,
+        `Sirf Male ya Female likho, aur kuch nahi.`,
+        `Gender clear chahiye — Male ya Female?`
       ],
       invalid_height: [
         `Height proper format mein bhejo: 172 cm ya 5'10".`,
         `Height samajh nahi aayi. Example: 168 cm.`,
-        `Please height clear format mein share karo.`
+        `Please height clear format mein share karo.`,
+        `Ye samajh nahi aaya. Height cm mein ya feet-inch mein bhejo.`,
+        `Height dobara — format sahi hona chahiye. Jaise: 170 cm.`
       ],
       invalid_weight: [
         `Valid weight bhejo in kg. Example: 68 kg.`,
         `Weight clear format mein bhejo. 20 se 300 kg ke beech hona chahiye.`,
-        `Current weight dobara bhejo. Example: 82 kg.`
+        `Current weight dobara bhejo. Example: 82 kg.`,
+        `Ye samajh nahi aaya. Weight sirf number mein kg mein bhejo.`,
+        `Weight dobara likho — sirf number, jaise 75 kg.`
       ],
       invalid_goal: [
         `Goal in 3 options mein se choose karo: Weight Loss / Weight Gain / Muscle Gain.`,
         `Target clear nahi hua. Please Weight Loss, Weight Gain, ya Muscle Gain likho.`,
-        `Goal dobara bhejo: Weight Loss / Weight Gain / Muscle Gain.`
+        `Goal dobara bhejo: Weight Loss / Weight Gain / Muscle Gain.`,
+        `Ye samajh nahi aaya. Teen mein se ek choose karo: Weight Loss, Weight Gain, Muscle Gain.`,
+        `Goal clear likho — Weight Loss, Weight Gain, ya Muscle Gain.`
       ],
       invalid_activity: [
         `Activity level inme se choose karo: Low / Moderate / High.`,
         `Low, Moderate, ya High mein reply karo.`,
-        `Activity level clear chahiye. Low / Moderate / High?`
+        `Activity level clear chahiye. Low / Moderate / High?`,
+        `Ye samajh nahi aaya. Sirf Low, Moderate, ya High likho.`,
+        `Activity level dobara — Low, Moderate, ya High?`
       ],
       invalid_food: [
         `Food preference likho: Veg ya Non-Veg.`,
         `Veg ya Non-Veg mein reply karo.`,
-        `Diet ke liye ye detail chahiye: Veg / Non-Veg.`
+        `Diet ke liye ye detail chahiye: Veg / Non-Veg.`,
+        `Sirf Veg ya Non-Veg likho.`,
+        `Food preference clear chahiye — Veg ya Non-Veg?`
       ],
       follow_up: [
         `Agar aur detail chahiye ya exercise kaise karu poochna hai, seedha message kar do.`,
         `Next step ke liye ya to PREMIUM type karo ya workout help maango.`,
-        `Plan mil gaya. Ab chaho to PREMIUM likho ya workout guidance le lo.`
+        `Plan mil gaya. Ab chaho to PREMIUM likho ya workout guidance le lo.`,
+        `Kuch aur jaanna hai? Workout, diet, ya PREMIUM — batao.`,
+        `Plan ready hai. Agar detail chahiye to PREMIUM likho, ya koi specific question poocho.`
       ]
     };
   }
@@ -122,11 +158,22 @@ class FitnessFlow {
     const normalized = message.toLowerCase();
     const currentStep = userData.flowStep || this.STEP.WELCOME;
 
+    // Flow guard: never go backward in steps
+    const stepOrder = [
+      this.STEP.WELCOME, this.STEP.GOAL, this.STEP.NAME, this.STEP.AGE,
+      this.STEP.GENDER, this.STEP.HEIGHT, this.STEP.WEIGHT,
+      this.STEP.ACTIVITY_LEVEL, this.STEP.FOOD_PREFERENCE,
+      this.STEP.MEDICAL_CONDITION, this.STEP.FREE_PLAN,
+      this.STEP.PREMIUM_PLAN, this.STEP.FOLLOW_UP
+    ];
+    const currentIdx = stepOrder.indexOf(currentStep);
+
     if (this.isGreeting(normalized)) {
+      const greetStep = currentIdx >= stepOrder.indexOf(this.STEP.NAME) ? currentStep : this.STEP.GOAL;
       return {
         message: this.getWelcomeMessage(),
-        nextStep: this.STEP.GOAL,
-        userData: { ...userData, flowStep: this.STEP.GOAL }
+        nextStep: greetStep,
+        userData: { ...userData, flowStep: greetStep }
       };
     }
 
@@ -147,7 +194,11 @@ class FitnessFlow {
     }
 
     if (this.isWorkoutQuestion(normalized)) {
-      return this.handleWorkoutQuestion(userData);
+      return this.handleIntentOverride('workout', userData);
+    }
+
+    if (this.isDietQuestion(normalized)) {
+      return this.handleIntentOverride('diet', userData);
     }
 
     switch (currentStep) {
@@ -178,7 +229,7 @@ class FitnessFlow {
       case this.STEP.FOLLOW_UP:
         return this.handleFollowUp(userData, normalized);
       default:
-        return this.handleWelcome(userData, normalized);
+        return this.handleFailsafe(userData, message);
     }
   }
 
@@ -206,9 +257,11 @@ class FitnessFlow {
       return this.retryStep(this.STEP.GOAL, userData, 'invalid_goal');
     }
 
+    const ack = this.getGoalAck(goal);
+    const motivation = this.getMotivation(userData);
     const nextStep = this.nextMissingStep({ ...userData, goal }, this.STEP.NAME);
     return {
-      message: `Goal noted: ${goal}.\n\n${this.getPrompt(nextStep, userData)}`,
+      message: `${ack}\n\n${motivation}\n\n${this.getPrompt(nextStep, { ...userData, goal })}`,
       nextStep,
       userData: { ...userData, goal, flowStep: nextStep }
     };
@@ -220,7 +273,14 @@ class FitnessFlow {
       return this.retryStep(this.STEP.NAME, userData, 'name');
     }
 
-    return this.askForNext({ ...userData, name }, this.STEP.AGE);
+    const goalRef = userData.goal ? ` ${userData.goal} ke liye` : '';
+    const filler = this.getFiller(userData);
+    const nextStep = this.nextMissingStep({ ...userData, name }, this.STEP.AGE);
+    return {
+      message: `Nice to meet you, ${name}!${goalRef} saath chalenge.\n\n${filler} ${this.getPrompt(nextStep, { ...userData, name })}`,
+      nextStep,
+      userData: { ...userData, name, flowStep: nextStep }
+    };
   }
 
   handleAge(userData, message) {
@@ -230,7 +290,13 @@ class FitnessFlow {
       return this.retryStep(this.STEP.AGE, userData, 'invalid_age');
     }
 
-    return this.askForNext({ ...userData, age: String(age) }, this.STEP.GENDER);
+    const nameRef = userData.name ? ` ${userData.name},` : '';
+    const nextStep = this.nextMissingStep({ ...userData, age: String(age) }, this.STEP.GENDER);
+    return {
+      message: `${nameRef} ${age} sahi hai. Plan aapki age ke hisaab se adjust hoga.\n\n${this.getPrompt(nextStep, { ...userData, age: String(age) })}`,
+      nextStep,
+      userData: { ...userData, age: String(age), flowStep: nextStep }
+    };
   }
 
   handleGender(userData, message) {
@@ -239,7 +305,12 @@ class FitnessFlow {
       return this.retryStep(this.STEP.GENDER, userData, 'invalid_gender');
     }
 
-    return this.askForNext({ ...userData, gender }, this.STEP.HEIGHT);
+    const nextStep = this.nextMissingStep({ ...userData, gender }, this.STEP.HEIGHT);
+    return {
+      message: `Got it. ${gender} body ke hisaab se plan tailor hoga.\n\n${this.getPrompt(nextStep, { ...userData, gender })}`,
+      nextStep,
+      userData: { ...userData, gender, flowStep: nextStep }
+    };
   }
 
   handleHeight(userData, message) {
@@ -248,7 +319,12 @@ class FitnessFlow {
       return this.retryStep(this.STEP.HEIGHT, userData, 'invalid_height');
     }
 
-    return this.askForNext({ ...userData, height }, this.STEP.WEIGHT);
+    const nextStep = this.nextMissingStep({ ...userData, height }, this.STEP.WEIGHT);
+    return {
+      message: `Height ${height} noted. BMI calc ke liye ye zaroori hai.\n\n${this.getPrompt(nextStep, { ...userData, height })}`,
+      nextStep,
+      userData: { ...userData, height, flowStep: nextStep }
+    };
   }
 
   handleWeight(userData, message) {
@@ -258,7 +334,13 @@ class FitnessFlow {
       return this.retryStep(this.STEP.WEIGHT, userData, 'invalid_weight');
     }
 
-    return this.askForNext({ ...userData, weight: String(weight).replace(/\.0$/, '') }, this.STEP.GOAL);
+    const insight = this.getInsight(userData);
+    const nextStep = this.nextMissingStep({ ...userData, weight: String(weight).replace(/\.0$/, '') }, this.STEP.ACTIVITY_LEVEL);
+    return {
+      message: `${weight} kg — noted. ${insight}\n\n${this.getPrompt(nextStep, { ...userData, weight: String(weight).replace(/\.0$/, '') })}`,
+      nextStep,
+      userData: { ...userData, weight: String(weight).replace(/\.0$/, ''), flowStep: nextStep }
+    };
   }
 
   handleActivityLevel(userData, message) {
@@ -267,7 +349,13 @@ class FitnessFlow {
       return this.retryStep(this.STEP.ACTIVITY_LEVEL, userData, 'invalid_activity');
     }
 
-    return this.askForNext({ ...userData, activityLevel }, this.STEP.FOOD_PREFERENCE);
+    const filler = this.getFiller(userData);
+    const nextStep = this.nextMissingStep({ ...userData, activityLevel }, this.STEP.FOOD_PREFERENCE);
+    return {
+      message: `${activityLevel} activity — plan accordingly adjust hoga.\n\n${filler} ${this.getPrompt(nextStep, { ...userData, activityLevel })}`,
+      nextStep,
+      userData: { ...userData, activityLevel, flowStep: nextStep }
+    };
   }
 
   handleFoodPreference(userData, message) {
@@ -276,11 +364,19 @@ class FitnessFlow {
       return this.retryStep(this.STEP.FOOD_PREFERENCE, userData, 'invalid_food');
     }
 
-    return this.askForNext({ ...userData, foodPreference }, this.STEP.MEDICAL_CONDITION);
+    const nameRef = userData.name || 'bhai';
+    const nextStep = this.nextMissingStep({ ...userData, foodPreference }, this.STEP.MEDICAL_CONDITION);
+    return {
+      message: `${foodPreference} — achha ${nameRef}, diet plan isi ke around banega.\n\n${this.getPrompt(nextStep, { ...userData, foodPreference })}`,
+      nextStep,
+      userData: { ...userData, foodPreference, flowStep: nextStep }
+    };
   }
 
   handleMedicalCondition(userData, message) {
     const medicalCondition = this.normalizeMedicalCondition(message);
+    const nameRef = userData.name || 'bhai';
+    const motivation = this.getMotivation(userData);
     const finalUserData = {
       ...userData,
       medicalCondition,
@@ -289,7 +385,7 @@ class FitnessFlow {
     };
 
     return {
-      message: this.buildFreePlan(finalUserData),
+      message: `Sab details mil gaye ${nameRef}. ${motivation}\n\n${this.buildFreePlan(finalUserData)}`,
       nextStep: this.STEP.FREE_PLAN,
       userData: finalUserData
     };
@@ -308,8 +404,10 @@ class FitnessFlow {
   }
 
   handlePremiumPlan(userData, message) {
+    const nameRef = userData.name || 'bhai';
+    const filler = this.getFiller(userData);
     return {
-      message: `Aap inme se jo option chaho choose kar sakte ho.\n\nPayment aur onboarding ke liye WhatsApp karo: +91 98886 01933\n\nAgar chaho to main plan samjha bhi deta hoon.`,
+      message: `${nameRef}, jo plan suit kare wo choose karo.\n\nPayment aur onboarding ke liye WhatsApp karo: +91 98886 01933\n\n${filler} agar koi plan detail mein samajhna ho to batao, main explain kar dunga.`,
       nextStep: this.STEP.FOLLOW_UP,
       userData: { ...userData, flowStep: this.STEP.FOLLOW_UP }
     };
@@ -336,10 +434,10 @@ class FitnessFlow {
       ...userData,
       premiumAskedEarly: true
     };
-    const nextStep = this.nextMissingStep(merged, this.STEP.NAME);
+    const nextStep = this.nextMissingStep(merged, this.STEP.GOAL);
 
     return {
-      message: nextStep === this.STEP.NAME
+      message: nextStep === this.STEP.GOAL
         ? this.getPrompt('premium_gate', merged)
         : `Premium details se pehle free basic plan complete karte hain.\n\n${this.getPrompt(nextStep, merged)}`,
       nextStep,
@@ -387,23 +485,27 @@ class FitnessFlow {
 
   nextMissingStep(userData, fallbackStep = null) {
     const order = [
+      [this.STEP.GOAL, 'goal'],
       [this.STEP.NAME, 'name'],
       [this.STEP.AGE, 'age'],
       [this.STEP.GENDER, 'gender'],
       [this.STEP.HEIGHT, 'height'],
       [this.STEP.WEIGHT, 'weight'],
-      [this.STEP.GOAL, 'goal'],
       [this.STEP.ACTIVITY_LEVEL, 'activityLevel'],
       [this.STEP.FOOD_PREFERENCE, 'foodPreference'],
       [this.STEP.MEDICAL_CONDITION, 'medicalCondition']
     ];
 
+    // Scan order first – never skip an earlier missing field
+    const missing = order.find(([, field]) => !userData[field]);
+    if (missing) return missing[0];
+
+    // All ordered fields set; check fallback
     if (fallbackStep && !this.hasFieldForStep(userData, fallbackStep)) {
       return fallbackStep;
     }
 
-    const missing = order.find(([, field]) => !userData[field]);
-    return missing ? missing[0] : null;
+    return null;
   }
 
   hasFieldForStep(userData, step) {
@@ -554,8 +656,8 @@ ${dinner}
 Medical Note: ${userData.medicalCondition}
 ${bonusTip}
 
-This is our FREE BASIC PLAN.
-For a more personalized and result-driven transformation, type 👉 PREMIUM`;
+This is a FREE BASIC PLAN.
+Type PREMIUM for advanced coaching.`;
   }
 
   showPremiumPlans(userData) {
@@ -618,10 +720,11 @@ Reply with the service name that fits you best.`;
 
   handleWorkoutQuestion(userData) {
     const goal = String(userData.goal || '').toLowerCase();
+    const insight = this.getInsight(userData);
 
     if (goal.includes('loss')) {
       return {
-        message: `Beginner workout for Weight Loss:\n1. 20 min brisk walk\n2. 3 sets squats x 12\n3. 3 sets wall push-ups x 10\n4. 3 sets plank x 20 sec\n5. 10 min light stretching\n\nTip: workout ke baad junk mat khao, warna calorie deficit break ho jata hai.`,
+        message: `🏋️ Beginner Weight Loss Workout (4-Day Plan)\n\n📌 Day 1 – Full Body\n• Brisk walk – 20 min\n• Squats – 3 sets x 12 reps\n• Wall push-ups – 3 sets x 10 reps\n• Plank – 3 sets x 20 sec\n\n📌 Day 2 – Cardio + Core\n• Jumping jacks – 3 sets x 30 sec\n• Mountain climbers – 3 sets x 10 reps\n• Bicycle crunches – 3 sets x 12 reps\n• Walking – 15 min\n\n📌 Day 3 – Rest or Light Walk\n\n📌 Day 4 – Lower Body + Cardio\n• Lunges – 3 sets x 10 each leg\n• Step-ups – 3 sets x 10 each leg\n• Glute bridge – 3 sets x 15 reps\n• Skipping – 5 min\n\n💡 ${insight}\n\nThis is a FREE BASIC PLAN.\nType PREMIUM for advanced coaching.`,
         nextStep: userData.flowStep || this.STEP.FOLLOW_UP,
         userData
       };
@@ -629,25 +732,198 @@ Reply with the service name that fits you best.`;
 
     if (goal.includes('weight gain')) {
       return {
-        message: `Beginner workout for Weight Gain:\n1. 3 sets bodyweight squats x 10\n2. 3 sets incline push-ups x 8\n3. 3 sets glute bridge x 12\n4. 3 sets chair dips x 8\n5. 5 min mobility\n\nTip: workout ke 60 minutes ke andar proper meal lo.`,
+        message: `🏋️ Beginner Weight Gain Workout (4-Day Plan)\n\n📌 Day 1 – Push\n• Incline push-ups – 3 sets x 8 reps\n• Chair dips – 3 sets x 8 reps\n• Pike push-ups – 3 sets x 6 reps\n• Plank – 3 sets x 20 sec\n\n📌 Day 2 – Pull + Core\n• Bodyweight rows (under table) – 3 sets x 8 reps\n• Superman hold – 3 sets x 15 sec\n• Bicycle crunches – 3 sets x 12 reps\n• Dead bug – 3 sets x 10 reps\n\n📌 Day 3 – Rest or Light Mobility\n\n📌 Day 4 – Legs\n• Bodyweight squats – 3 sets x 12 reps\n• Lunges – 3 sets x 10 each leg\n• Glute bridge – 3 sets x 15 reps\n• Calf raises – 3 sets x 15 reps\n\n💡 ${insight}\n\nThis is a FREE BASIC PLAN.\nType PREMIUM for advanced coaching.`,
         nextStep: userData.flowStep || this.STEP.FOLLOW_UP,
         userData
       };
     }
 
     return {
-      message: `Beginner workout for Muscle Gain:\n1. 3 sets squats x 12\n2. 3 sets push-ups x 8\n3. 3 sets lunges x 10 each leg\n4. 3 sets plank x 30 sec\n5. 3 sets superman hold x 15 sec\n\nTip: same workout 3-4 weeks consistently karo, phir reps increase karo.`,
+      message: `🏋️ Beginner Muscle Gain Workout (4-Day Plan)\n\n📌 Day 1 – Upper Body\n• Push-ups – 4 sets x 8-12 reps\n• Diamond push-ups – 3 sets x 6-8 reps\n• Chair dips – 3 sets x 8-10 reps\n• Plank – 3 sets x 30 sec\n\n📌 Day 2 – Lower Body\n• Squats – 4 sets x 12-15 reps\n• Lunges – 3 sets x 10 each leg\n• Glute bridge – 3 sets x 15 reps\n• Calf raises – 3 sets x 20 reps\n\n📌 Day 3 – Rest or Stretching\n\n📌 Day 4 – Full Body\n• Burpees – 3 sets x 6 reps\n• Mountain climbers – 3 sets x 10 reps\n• Superman hold – 3 sets x 15 sec\n• Push-ups – 3 sets x max reps\n\n💡 ${insight}\n\nThis is a FREE BASIC PLAN.\nType PREMIUM for advanced coaching.`,
       nextStep: userData.flowStep || this.STEP.FOLLOW_UP,
       userData
     };
   }
 
   composeFollowUp(userData) {
-    return `Plan ready hai, ${userData.name || 'bhai'}.\n\n${this.getPrompt('follow_up', userData)}`;
+    const nameRef = userData.name || 'bhai';
+    const goalRef = userData.goal || '';
+    const motivation = this.getMotivation(userData);
+    return `${nameRef}, ${goalRef ? goalRef.toLowerCase() + ' ke liye ' : ''}plan ready hai. ${motivation}\n\n${this.getPrompt('follow_up', userData)}`;
   }
 
   handleSteroidsQuestion() {
     return `Bhai steroids safe shortcut nahi hote.\n\nNatural training, proper diet, aur consistency se hi long-term body banti hai.\nAgar chaho to main tumhare goal ke hisaab se natural plan set kar deta hoon.`;
+  }
+
+  getInsight(userData) {
+    const insights = [
+      'Protein har meal mein include karo, muscle recovery faster hogi.',
+      'Sleep 7-8 hours rakho, body repair tabhi hoti hai.',
+      'Pani roz 3-4 litre peeo, metabolism boost hota hai.',
+      'Consistency sabse important hai – 1 din miss kiya to guilt mat, next din se wapas start.',
+      'Warm-up pe skip mat karo, injury se bachata hai.',
+      'Post-workout 30 min ke andar protein lo, absorption best hota hai.',
+      'Processed food avoid karo, natural khana hi real fuel hai.',
+      'Weekly progress track karo – weight, photos, energy level sab note karo.',
+      'Rest days ko lightly walk karo, active recovery help karta hai.',
+      'Sugar sweet drinks chhodo, fat loss 2x fast hoga.'
+    ];
+    const idx = (userData.insightIndex || 0) % insights.length;
+    userData.insightIndex = idx + 1;
+    return insights[idx];
+  }
+
+  getMotivation(userData) {
+    const lines = [
+      'Consistency rakho, result pakka milega 💪',
+      'Slow progress bhi progress hai, mat ruko.',
+      'Har din ek step aage badho, body follow karegi.',
+      'Tum kar sakte ho, bas start karte raho.',
+      'Chhota sa effort bhi zero se better hai.',
+      'Discipline > motivation. Roz dikhao.',
+      'Transformation overnight nahi hota, but hota zaroor hai.',
+      'Focus rakho, body change ho rahi hai even if dikhe nahi abhi.'
+    ];
+    const idx = (userData.motivationIndex || 0) % lines.length;
+    userData.motivationIndex = idx + 1;
+    return lines[idx];
+  }
+
+  getFiller(userData) {
+    const fillers = [
+      'By the way,',
+      'Aur haan,',
+      'Ek cheez aur —',
+      'Achha suno,',
+      'Bhai ek baat batau,',
+      'Dekho,',
+      'Sunao,',
+      'Socho,'
+    ];
+    const idx = (userData.fillerIndex || 0) % fillers.length;
+    userData.fillerIndex = idx + 1;
+    return fillers[idx];
+  }
+
+  getGoalAck(goal) {
+    const acks = {
+      'Weight Loss': [
+        'Fat loss ka plan bana dete hain — solid approach se karenge.',
+        'Weight loss challenging hai but bilkul ho sakta hai. Main saath dunga.',
+        'Pet aur body fat reduce karna hai? Chalo karte hain.',
+        'Good choice. Calorie deficit + right exercise = result pakka.'
+      ],
+      'Weight Gain': [
+        'Weight gain smart way se karenge, sirf fat nahi badhana.',
+        'Dublaapan chhodna hai? Proper surplus se healthy weight aayega.',
+        'Mass badhana hai — diet aur training dono sahi rakhenge.',
+        'Solid. Calorie surplus + strength training se weight aayega.'
+      ],
+      'Muscle Gain': [
+        'Muscle building ke liye consistency chahiye, main plan de dunga.',
+        'Body banani hai? Progressive overload + high protein se hoga.',
+        'Great goal. Muscle gain requires patience but result worth hai.',
+        'Muscle gain ka rasta clear hai — train smart, eat right, rest enough.'
+      ]
+    };
+    const options = acks[goal] || acks['Muscle Gain'];
+    const idx = Math.floor(Math.random() * options.length);
+    return options[idx];
+  }
+
+  isDietQuestion(message) {
+    return /(diet|kya khau|khana|meal|nutrition|calorie|bhook|pet bhara|recipe|recipie|ghar ka khana)/i.test(message);
+  }
+
+  handleDietQuestion(userData) {
+    const goal = String(userData.goal || '').toLowerCase();
+    const insight = this.getInsight(userData);
+
+    if (!userData.freePlanDelivered) {
+      const nextStep = this.nextMissingStep(userData, this.STEP.GOAL);
+      return {
+        message: `Bhai pehle profile complete karte hain, phir personalized diet plan bana dunga 💪\n\n${this.getPrompt(nextStep, userData)}`,
+        nextStep,
+        userData: { ...userData, flowStep: nextStep }
+      };
+    }
+
+    let dietTip = '';
+    if (goal.includes('loss')) {
+      dietTip = 'Weight loss ke liye calorie deficit zaroori hai. Har meal mein protein rakho, processed food chhodo.';
+    } else if (goal.includes('weight gain')) {
+      dietTip = 'Weight gain ke liye calorie surplus chahiye. Har meal mein calorie-dense foods jaise peanut butter, banana, milk add karo.';
+    } else {
+      dietTip = 'Muscle gain ke liye high protein diet zaroori hai. 1.6-2g protein per kg bodyweight daily target rakho.';
+    }
+
+    return {
+      message: `🥗 Quick Diet Tip:\n\n${dietTip}\n\n💡 ${insight}\n\nApna complete diet plan upar mila hai. Detail mein jaanne ke liye PREMIUM type karo.`,
+      nextStep: userData.flowStep || this.STEP.FOLLOW_UP,
+      userData
+    };
+  }
+
+  handleIntentOverride(intentType, userData) {
+    // Answer the question FIRST
+    const answer = intentType === 'workout'
+      ? this.handleWorkoutQuestion(userData)
+      : this.handleDietQuestion(userData);
+
+    // If plan is delivered, no need to resume flow — just return the answer
+    if (userData.freePlanDelivered) return answer;
+
+    // Resume flow: append next missing step prompt after the answer
+    const nextStep = this.nextMissingStep(userData, this.STEP.GOAL);
+    if (nextStep) {
+      const flowPrompt = this.getPrompt(nextStep, userData);
+      const resumeVariants = [
+        `\n\nAb wapas profile pe aate hain — ${flowPrompt}`,
+        `\n\nBy the way, ${flowPrompt}`,
+        `\n\nAur haan, ${flowPrompt}`
+      ];
+      const vIdx = (userData.intentResumeIndex || 0) % resumeVariants.length;
+      userData.intentResumeIndex = vIdx + 1;
+
+      return {
+        message: answer.message + resumeVariants[vIdx],
+        nextStep,
+        userData: { ...userData, ...answer.userData, flowStep: nextStep }
+      };
+    }
+
+    return answer;
+  }
+
+  handleFailsafe(userData, message) {
+    // When input doesn't match any step or intent
+    const clarificationVariants = [
+      'Main sahi guide karne ke liye ek cheez confirm kar lu — aap kya jaanna chahte ho?',
+      'Thoda clear batao to better help kar paunga. Goal, diet, ya workout ke baare mein?',
+      'Samajh nahi aaya exactly. Batao — fitness goal hai ya koi specific question?'
+    ];
+    const idx = (userData.failsafeIndex || 0) % clarificationVariants.length;
+    userData.failsafeIndex = idx + 1;
+
+    const currentStep = userData.flowStep || this.STEP.WELCOME;
+    // If onboarding not complete, gently nudge back
+    if (currentStep !== this.STEP.FOLLOW_UP && currentStep !== this.STEP.PREMIUM_PLAN) {
+      const nextStep = this.nextMissingStep(userData, this.STEP.GOAL);
+      if (nextStep) {
+        return {
+          message: `${clarificationVariants[idx]}\n\n${this.getPrompt(nextStep, userData)}`,
+          nextStep,
+          userData: { ...userData, flowStep: nextStep }
+        };
+      }
+    }
+
+    return {
+      message: clarificationVariants[idx],
+      nextStep: currentStep,
+      userData
+    };
   }
 
   isSteroidsQuestion(message) {

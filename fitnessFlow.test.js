@@ -34,7 +34,7 @@ function testPremiumQuestionStartsFreeAssessment() {
   resetTestUser();
 
   const result = fitnessFlow.processFlow({}, 'premium plan kya hai');
-  assert.strictEqual(result.nextStep, fitnessFlow.STEP.NAME);
+  assert.strictEqual(result.nextStep, fitnessFlow.STEP.GOAL);
   assert.strictEqual(result.userData.premiumAskedEarly, true);
   assert(!/₹499|₹1999|₹2999|₹3999/.test(result.message));
 }
@@ -42,8 +42,14 @@ function testPremiumQuestionStartsFreeAssessment() {
 function testCollectionCapturesMissingFieldsThroughMedicalCondition() {
   resetTestUser();
 
-  let userData = { flowStep: fitnessFlow.STEP.NAME, premiumAskedEarly: true };
-  let result = fitnessFlow.processFlow(userData, 'Rahul');
+  // Spec order: Goal → Name → Age → Gender → Height → Weight → Activity → Food → Medical
+  let userData = { flowStep: fitnessFlow.STEP.GOAL, premiumAskedEarly: true };
+  let result = fitnessFlow.processFlow(userData, 'muscle gain');
+  assert.strictEqual(result.nextStep, fitnessFlow.STEP.NAME);
+  assert.strictEqual(result.userData.goal, 'Muscle Gain');
+  userData = { ...userData, ...result.userData };
+
+  result = fitnessFlow.processFlow(userData, 'Rahul');
   assert.strictEqual(result.nextStep, fitnessFlow.STEP.AGE);
   userData = { ...userData, ...result.userData };
 
@@ -60,12 +66,7 @@ function testCollectionCapturesMissingFieldsThroughMedicalCondition() {
   userData = { ...userData, ...result.userData };
 
   result = fitnessFlow.processFlow(userData, '78 kg');
-  assert.strictEqual(result.nextStep, fitnessFlow.STEP.GOAL);
-  userData = { ...userData, ...result.userData };
-
-  result = fitnessFlow.processFlow(userData, 'muscle gain');
   assert.strictEqual(result.nextStep, fitnessFlow.STEP.ACTIVITY_LEVEL);
-  assert.strictEqual(result.userData.goal, 'Muscle Gain');
   assert(/activity level/i.test(result.message));
   userData = { ...userData, ...result.userData };
 
@@ -89,6 +90,7 @@ function testNoRepeatedQuestionsSkipsCompletedFields() {
 
   const userData = {
     flowStep: fitnessFlow.STEP.WELCOME,
+    goal: 'Muscle Gain',
     name: 'Rahul',
     age: '28',
     gender: 'Male'
@@ -121,8 +123,8 @@ function testFreePlanIncludesStructuredMealsAndPremiumCTA() {
   assert(result.message.includes('Morning (Empty Stomach)'));
   assert(result.message.includes('Breakfast'));
   assert(result.message.includes('Mid-Morning Snack'));
-  assert(result.message.includes('This is our FREE BASIC PLAN.'));
-  assert(result.message.includes('type 👉 PREMIUM'));
+  assert(result.message.includes('This is a FREE BASIC PLAN.'));
+  assert(result.message.includes('Type PREMIUM for advanced coaching'));
 }
 
 function testPremiumKeywordAfterFreePlanShowsAllFourOffers() {
