@@ -492,7 +492,20 @@ function resetAuthState() {
 async function startBot() {
   if (isStartingBot) return;
   isStartingBot = true;
-  
+
+  // Force fresh authentication by deleting stale auth files
+  try {
+    if (fs.existsSync(AUTH_DIR)) {
+      fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+      console.log('🔄 Deleted stale auth files - forcing fresh authentication');
+      log.info('auth_files_deleted_on_startup', { authDir: AUTH_DIR });
+    }
+  } catch (error) {
+    console.error('⚠️ Failed to delete auth directory:', error.message);
+    log.warn('auth_deletion_failed', { error: error.message });
+  }
+  fs.mkdirSync(AUTH_DIR, { recursive: true });
+
   try {
     if (sock) {
       try {
@@ -502,6 +515,7 @@ async function startBot() {
     }
 
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
+
     
 const { version } = await fetchLatestBaileysVersion();
 const baileysLogger = pino({ level: 'error' });
