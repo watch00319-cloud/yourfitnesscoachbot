@@ -381,7 +381,8 @@ startHttpServer(PORT);
 
 let reconnectAttempts = 0;
 let lastReconnectTime = null;
-const MAX_RECONNECT_ATTEMPTS = 10;
+const MAX_RECONNECT_ATTEMPTS = 20;
+
 const RECONNECT_BACKOFF_MS = 5000; // 5 seconds base backoff
 
 // 🪵 GLOBAL WINSTON LOGGER
@@ -523,12 +524,15 @@ const baileysLogger = pino({ level: 'error' });
       browser: Browsers.ubuntu('Chrome'),
       syncFullHistory: false,
       markOnlineOnConnect: false,
-      defaultQueryTimeoutMs: 120000,
-      connectTimeoutMs: 120000,
-      keepAliveIntervalMs: 30000,
+      defaultQueryTimeoutMs: 180000,
+      connectTimeoutMs: 180000,
+      keepAliveIntervalMs: 60000,
+      retryRequestDelayMs: 100,
+      shouldIgnoreJidEndpoint: true,
+      maxMsgsInMemory: 100,
       generateHighQualityLinkPreview: false
     });
-    
+
     sock.ev.on('creds.update', saveCreds);
     // Also upload auth files to S3 (if configured) so auth persists across restarts
     if (process.env.S3_BUCKET) {
